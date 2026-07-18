@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Web app for tracking sourdough starters and recipes. Runs locally/homelab. Privacy-first — no external cloud calls except Ollama (local).
+**Knead to Know** — web app for tracking sourdough starters, feedings, recipes, and bakes. Runs locally/homelab. Privacy-first — no external cloud calls except Ollama (local LLM).
 
 **Stack:** FastAPI (Python) · Vue 3 (TypeScript) · SQLite · Docker Compose · Ollama (local LLM)
 
@@ -34,47 +34,88 @@ npm test           # vitest unit tests
 
 ### Docker (full stack)
 ```bash
-docker compose up -d          # start all services
+docker compose up -d          # start all services (app on port 3000)
 docker compose down           # stop
 docker compose logs -f api    # tail backend logs
 ```
 
 ## Architecture
 
-### Backend (`backend/`)
-- `app/main.py` — FastAPI app, mounts routers, configures CORS
-- `app/models/` — SQLAlchemy models: `Starter`, `Feeding`, `Recipe`, `Timer`
-- `app/routers/` — one file per domain: `starters.py`, `recipes.py`, `timers.py`, `ollama.py`
-- `app/db.py` — SQLite engine + session dependency (`get_db`)
-- `app/ollama.py` — Ollama client: sends recipe text to local LLM, parses structured response
+### Backend (`backend/app/`)
+- `main.py` — FastAPI app, mounts routers, runs startup migrations, configures CORS
+- `migrate.py` — SQLite ALTER TABLE migrations run on startup (safe to re-run)
+- `models/` — SQLAlchemy models: `Starter`, `Feeding`, `Recipe`, `RecipeStep`, `Timer`, `Bake`, `Setting`
+- `schemas/` — Pydantic schemas per domain
+- `routers/` — one file per domain:
+  - `starters.py` — CRUD + feedings; `?show_archived=true` to include archived
+  - `recipes.py` — CRUD + Ollama import
+  - `timers.py` — active countdown timers
+  - `bakes.py` — bake log (links starter + recipe)
+  - `ollama.py` — config, model list/pull, `/chat` endpoint
+  - `export_data.py` — GET `/api/export/` returns full JSON backup (download)
+  - `import_data.py` — POST `/api/import/` restores from backup JSON, remaps IDs
+- `services/ollama.py` — Ollama HTTP client; sourdough expert system prompt on all requests
+- `db.py` — SQLite engine + `get_db` session dependency
 
 ### Frontend (`frontend/src/`)
-- `views/` — page-level components: `StartersView`, `RecipeView`, `TimerView`
-- `components/` — reusable UI: `StarterCard`, `FeedingLog`, `RecipeImporter`, `TimerWidget`
-- `stores/` — Pinia stores: `starters.ts`, `recipes.ts`, `timers.ts`
-- `api/` — typed fetch wrappers matching backend routes
+- `views/` — `StartersView`, `RecipesView`, `TimersView`, `BakesView`, `ChatView`, `HydrationView`, `SettingsView`
+- `components/` — `StarterCard`, `FeedingLog`, `RecipeCard`, `RecipeImporter`, `TimerWidget`, `BakeCard`
+- `stores/` — `starters.ts`, `recipes.ts`, `timers.ts`, `bakes.ts`, `ollama.ts`, `units.ts`, `theme.ts`
+- `api/` — typed fetch wrappers; all requests go through `/api` prefix (proxied by nginx in Docker)
 
 ### Ollama Integration
-Ollama runs as separate service (host or Docker). Backend calls `http://ollama:11434` (Docker) or `http://localhost:11434` (dev). Recipe import flow: user pastes raw text → `/api/recipes/import` → backend sends to Ollama with structured prompt → returns parsed `Recipe` JSON → user confirms and saves.
+Ollama runs on host or as separate Docker service. All requests include a sourdough expert system prompt.
+- **Recipe import:** paste raw text → `/api/recipes/import` → Ollama parses → user confirms → saved
+- **Baker chat:** `/chat` view, multi-turn conversation, full message history sent each request
 
-### Data Model (key relationships)
-- `Starter` has many `Feeding` (feeding log per starter)
-- `Recipe` has many `RecipeStep` (ordered steps with optional timer durations)
-- `Timer` belongs to optional `RecipeStep`, tracks active countdowns
+### Data Model
+- `Starter` → many `Feeding` (flour/water/starter grams, height_mm, ambient_temp_f, notes)
+- `Starter` fields: `feed_interval_hours` (reminder), `archived` (soft delete)
+- `Recipe` → many `RecipeStep` (ordered, optional duration_minutes)
+- `Bake` → optional FK to `Starter` and `Recipe`; records hydration, oven temp, outcome, notes
+- `Timer` → optional FK to `RecipeStep`
+- `Setting` — key/value store for Ollama URL/model overrides (survives restarts)
 
-### Multi-Starter Design
-All data scoped to `starter_id`. Starters have user-defined names. No auth — single-user homelab app.
+### DB Migrations
+New columns are added via `app/migrate.py` at startup using `PRAGMA table_info` + `ALTER TABLE ADD COLUMN`. Safe for existing installs — columns only added if missing.
+
+## Features
+
+| Feature | Location |
+|---|---|
+| Starter tracking + feeding log | StartersView / StarterCard |
+| Feeding reminders (interval badge) | StarterCard — "Feed me!" badge when overdue |
+| Rise chart (height over time) | FeedingLog — SVG sparkline from `height_mm` readings |
+| Starter archive / restore | StarterCard archive button; StartersView "Show archived" toggle |
+| Recipe import via Ollama | RecipesView → Import via Ollama |
+| Recipe step check-off | RecipeCard — click step to mark done |
+| Recipe scaling | RecipeCard — scale × input, durations update, weight banner shown |
+| Timers | TimersView |
+| Bake log | BakesView — links starter + recipe, records outcome |
+| Baker chat (Ollama) | ChatView — multi-turn sourdough expert Q&A |
+| Hydration calculator | HydrationView — flour/hydration/starter → added water |
+| Unit setting (g/oz/cup) | Settings → Units; applies to all weight inputs + feeding display |
+| Dark mode | ◑ toggle in nav, persists to localStorage |
+| Data export | Settings → Download Backup (JSON) |
+| Data import | Settings → Import Backup (file picker) |
 
 ## Environment Variables
 
 ```env
-# backend/.env
+# backend/.env (local dev)
 DATABASE_URL=sqlite:///./sourdough.db
-OLLAMA_BASE_URL=http://100.113.255.94:11434
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3
+```
+
+```env
+# root .env (Docker override)
+PORT=3000                              # host port for frontend (default 3000)
+OLLAMA_BASE_URL=http://host.docker.internal:11434
 OLLAMA_MODEL=llama3
 ```
 
 ## Docker Compose Services
-- `api` — FastAPI backend
-- `frontend` — Vue static files via nginx
-- `ollama` — optional; can point to host Ollama instead
+- `api` — FastAPI/uvicorn backend; SQLite stored in named volume `db-data`
+- `frontend` — Vue build served by nginx; proxies `/api/*` → `api:8000`
+- Ollama: external (set `OLLAMA_BASE_URL` to point to host or separate instance)
