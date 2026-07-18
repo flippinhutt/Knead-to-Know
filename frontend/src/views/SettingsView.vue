@@ -21,6 +21,12 @@
       <p v-else class="muted">Loading config…</p>
     </div>
 
+    <div class="card" style="margin-bottom:1rem">
+      <h2 style="margin-bottom:0.75rem;font-size:1rem">Data</h2>
+      <p class="muted" style="margin-bottom:0.75rem;font-size:0.82rem">Download all starters, feedings, recipes, and bakes as JSON.</p>
+      <a class="btn-primary btn-sm" href="/api/export/" download="knead-to-know-export.json">Download Backup</a>
+    </div>
+
     <div class="card">
       <h2 style="margin-bottom:0.75rem;font-size:1rem">Available Models</h2>
       <button class="btn-secondary btn-sm" style="margin-bottom:0.75rem" :disabled="store.loading" @click="store.fetchModels()">

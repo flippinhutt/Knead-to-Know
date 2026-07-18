@@ -8,6 +8,7 @@ class FeedingCreate(BaseModel):
     water_grams: float | None = None
     starter_grams: float | None = None
     height_mm: int | None = None
+    ambient_temp_f: int | None = None
     notes: str | None = None
 
 

@@ -26,6 +26,7 @@
           <div><label>Flour (g)</label><input v-model.number="feed.flour_grams" type="number" /></div>
           <div><label>Water (g)</label><input v-model.number="feed.water_grams" type="number" /></div>
           <div><label>Height (mm)</label><input v-model.number="feed.height_mm" type="number" /></div>
+          <div><label>Temp (°F)</label><input v-model.number="feed.ambient_temp_f" type="number" /></div>
         </div>
         <input v-model="feed.notes" placeholder="Notes (optional)" style="margin-top:0.4rem" />
         <button class="btn-primary btn-sm" style="margin-top:0.5rem" @click="submitFeeding">Log Feeding</button>
@@ -65,6 +66,7 @@ const feed = reactive({
   flour_grams: undefined as number | undefined,
   water_grams: undefined as number | undefined,
   height_mm: undefined as number | undefined,
+  ambient_temp_f: undefined as number | undefined,
   notes: '',
 })
 const intervalHours = ref<number | undefined>(props.starter.feed_interval_hours ?? undefined)
@@ -82,12 +84,14 @@ async function submitFeeding() {
     flour_grams: feed.flour_grams,
     water_grams: feed.water_grams,
     height_mm: feed.height_mm,
+    ambient_temp_f: feed.ambient_temp_f,
     notes: feed.notes || undefined,
   })
   feed.starter_grams = undefined
   feed.flour_grams = undefined
   feed.water_grams = undefined
   feed.height_mm = undefined
+  feed.ambient_temp_f = undefined
   feed.notes = ''
 }
 
@@ -121,7 +125,7 @@ h3 { font-size: 1rem; font-weight: 600; }
 details { margin-top: 0.5rem; }
 summary { cursor: pointer; font-size: 0.85rem; color: var(--accent); user-select: none; }
 .feeding-form { margin-top: 0.5rem; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem; }
+.form-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.5rem; }
 .interval-form { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
 .btn-ghost { background: none; border: 1px solid var(--border, #ccc); color: var(--text-muted); border-radius: 4px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.75rem; }
 </style>

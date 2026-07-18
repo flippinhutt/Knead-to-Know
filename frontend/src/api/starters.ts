@@ -11,7 +11,7 @@ export const startersApi = {
   remove: (id: number) => apiFetch<void>(`/starters/${id}`, { method: 'DELETE' }),
   addFeeding: (
     starterId: number,
-    data: { flour_grams?: number; water_grams?: number; starter_grams?: number; height_mm?: number; notes?: string },
+    data: { flour_grams?: number; water_grams?: number; starter_grams?: number; height_mm?: number; ambient_temp_f?: number; notes?: string },
   ) =>
     apiFetch<Feeding>(`/starters/${starterId}/feedings`, {
       method: 'POST',

@@ -6,6 +6,7 @@ export interface Feeding {
   water_grams: number | null
   starter_grams: number | null
   height_mm: number | null
+  ambient_temp_f: number | null
   notes: string | null
 }
 
