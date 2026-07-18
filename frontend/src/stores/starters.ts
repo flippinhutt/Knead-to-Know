@@ -37,7 +37,7 @@ export const useStartersStore = defineStore('starters', () => {
     starters.value = starters.value.filter((s) => s.id !== id)
   }
 
-  async function addFeeding(starterId: number, data: { flour_grams?: number; water_grams?: number; starter_grams?: number; height_mm?: number; ambient_temp_f?: number; notes?: string }): Promise<Feeding> {
+  async function addFeeding(starterId: number, data: { flour_grams?: number; water_grams?: number; starter_grams?: number; height_mm?: number; ambient_temp_f?: number; flour_type?: string; flour_brand?: string; notes?: string }): Promise<Feeding> {
     const feeding = await startersApi.addFeeding(starterId, data)
     starters.value = starters.value.map((s) =>
       s.id === starterId ? { ...s, feedings: [feeding, ...s.feedings] } : s,

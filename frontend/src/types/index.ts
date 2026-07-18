@@ -7,6 +7,8 @@ export interface Feeding {
   starter_grams: number | null
   height_mm: number | null
   ambient_temp_f: number | null
+  flour_type: string | null
+  flour_brand: string | null
   notes: string | null
 }
 
@@ -30,6 +32,7 @@ export interface Bake {
   oven_temp_f: number | null
   outcome: string | null
   notes: string | null
+  tags: string | null
 }
 
 export interface ChatMessage {

@@ -15,7 +15,7 @@ def list_bakes(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=BakeOut, status_code=201)
 def create_bake(body: BakeCreate, db: Session = Depends(get_db)):
-    bake = Bake(**body.model_dump())
+    bake = Bake(**body.model_dump(exclude_none=True))
     db.add(bake)
     db.commit()
     db.refresh(bake)

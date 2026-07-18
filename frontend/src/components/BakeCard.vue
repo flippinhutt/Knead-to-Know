@@ -12,7 +12,10 @@
         </div>
         <div class="bake-details">
           <span v-if="bake.hydration_percent">{{ bake.hydration_percent }}% hydration</span>
-          <span v-if="bake.oven_temp_f">{{ bake.oven_temp_f }}°F</span>
+          <span v-if="bake.oven_temp_f">{{ units.toDisplayTemp(bake.oven_temp_f) }}{{ units.tempLabel }}</span>
+        </div>
+        <div v-if="bake.tags" class="bake-tags">
+          <span v-for="tag in parsedTags" :key="tag" class="tag-pill">{{ tag }}</span>
         </div>
         <p v-if="bake.notes" class="notes">{{ bake.notes }}</p>
       </div>
@@ -22,9 +25,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Bake } from '@/types'
-defineProps<{ bake: Bake; starterName?: string | null; recipeName?: string | null }>()
+import { useUnitsStore } from '@/stores/units'
+
+const props = defineProps<{ bake: Bake; starterName?: string | null; recipeName?: string | null }>()
 defineEmits<{ deleted: [] }>()
+
+const units = useUnitsStore()
+
+const parsedTags = computed(() =>
+  props.bake.tags ? props.bake.tags.split(',').map((t) => t.trim()).filter(Boolean) : []
+)
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -43,5 +55,7 @@ function formatDate(iso: string) {
 .bake-links { display: flex; gap: 0.4rem; margin-bottom: 0.25rem; flex-wrap: wrap; }
 .link-tag { font-size: 0.72rem; background: var(--border); color: var(--text-muted); padding: 0.1rem 0.4rem; border-radius: 4px; }
 .bake-details { display: flex; gap: 0.75rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+.bake-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+.tag-pill { font-size: 0.7rem; background: #ede9fe; color: #5b21b6; padding: 0.1rem 0.4rem; border-radius: 999px; }
 .notes { font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin-top: 0.25rem; }
 </style>

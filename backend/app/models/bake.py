@@ -17,3 +17,4 @@ class Bake(Base):
     oven_temp_f: Mapped[int | None] = mapped_column(Integer)
     outcome: Mapped[str | None] = mapped_column(String(50))
     notes: Mapped[str | None] = mapped_column(Text)
+    tags: Mapped[str | None] = mapped_column(String(500))

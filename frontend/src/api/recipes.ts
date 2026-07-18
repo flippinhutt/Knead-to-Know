@@ -9,9 +9,11 @@ export const recipesApi = {
   update: (id: number, data: Partial<{ name: string; description: string; source: string }>) =>
     apiFetch<Recipe>(`/recipes/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id: number) => apiFetch<void>(`/recipes/${id}`, { method: 'DELETE' }),
-  import: (raw_text: string, model?: string) =>
+  replaceSteps: (id: number, steps: Array<{ order: number; description: string; duration_minutes?: number | null }>) =>
+    apiFetch<Recipe>(`/recipes/${id}/steps`, { method: 'PUT', body: JSON.stringify({ steps }) }),
+  import: (params: { raw_text?: string; url?: string; model?: string }) =>
     apiFetch<RecipeImportPreview>('/recipes/import', {
       method: 'POST',
-      body: JSON.stringify({ raw_text, model }),
+      body: JSON.stringify(params),
     }),
 }

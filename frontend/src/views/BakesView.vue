@@ -28,8 +28,8 @@
           <input v-model.number="form.hydration_percent" type="number" min="50" max="120" />
         </div>
         <div>
-          <label>Oven Temp (°F)</label>
-          <input v-model.number="form.oven_temp_f" type="number" />
+          <label>Oven Temp ({{ unitsStore.tempLabel }})</label>
+          <input v-model.number="form.oven_temp_display" type="number" />
         </div>
         <div>
           <label>Outcome</label>
@@ -41,6 +41,14 @@
             <option value="poor">Poor</option>
           </select>
         </div>
+        <div>
+          <label>Date baked</label>
+          <input v-model="form.baked_at" type="datetime-local" />
+        </div>
+      </div>
+      <div style="margin-top:0.5rem">
+        <label>Tags (comma-separated)</label>
+        <input v-model="form.tags" placeholder="e.g. sourdough, pizza, whole wheat" />
       </div>
       <textarea v-model="form.notes" rows="3" placeholder="Notes on crumb, crust, flavor..." style="margin-top:0.5rem" />
       <button class="btn-primary btn-sm" style="margin-top:0.5rem" @click="submit">Save Bake</button>
@@ -66,18 +74,22 @@ import { onMounted, reactive, ref } from 'vue'
 import { useBakesStore } from '@/stores/bakes'
 import { useStartersStore } from '@/stores/starters'
 import { useRecipesStore } from '@/stores/recipes'
+import { useUnitsStore } from '@/stores/units'
 import BakeCard from '@/components/BakeCard.vue'
 
 const store = useBakesStore()
 const startersStore = useStartersStore()
 const recipesStore = useRecipesStore()
+const unitsStore = useUnitsStore()
 const showForm = ref(false)
 const form = reactive({
   starter_id: undefined as number | undefined,
   recipe_id: undefined as number | undefined,
   hydration_percent: undefined as number | undefined,
-  oven_temp_f: undefined as number | undefined,
+  oven_temp_display: undefined as number | undefined,
   outcome: '',
+  baked_at: '',
+  tags: '',
   notes: '',
 })
 
@@ -100,15 +112,19 @@ async function submit() {
     starter_id: form.starter_id,
     recipe_id: form.recipe_id,
     hydration_percent: form.hydration_percent,
-    oven_temp_f: form.oven_temp_f,
+    oven_temp_f: unitsStore.toStoredTempF(form.oven_temp_display) ?? undefined,
     outcome: form.outcome || undefined,
+    baked_at: form.baked_at || undefined,
+    tags: form.tags || undefined,
     notes: form.notes || undefined,
   })
   form.starter_id = undefined
   form.recipe_id = undefined
   form.hydration_percent = undefined
-  form.oven_temp_f = undefined
+  form.oven_temp_display = undefined
   form.outcome = ''
+  form.baked_at = ''
+  form.tags = ''
   form.notes = ''
   showForm.value = false
 }

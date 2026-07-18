@@ -40,8 +40,13 @@ class RecipeOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class RecipeStepsReplaceRequest(BaseModel):
+    steps: list[RecipeStepCreate]
+
+
 class RecipeImportRequest(BaseModel):
-    raw_text: str
+    raw_text: str = ""
+    url: str | None = None
     model: str | None = None  # override default model per-request
 
 

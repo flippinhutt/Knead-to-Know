@@ -60,7 +60,7 @@ docker compose logs -f api    # tail backend logs
 ### Frontend (`frontend/src/`)
 - `views/` — `StartersView`, `RecipesView`, `TimersView`, `BakesView`, `ChatView`, `HydrationView`, `SettingsView`
 - `components/` — `StarterCard`, `FeedingLog`, `RecipeCard`, `RecipeImporter`, `TimerWidget`, `BakeCard`
-- `stores/` — `starters.ts`, `recipes.ts`, `timers.ts`, `bakes.ts`, `ollama.ts`, `units.ts`, `theme.ts`
+- `stores/` — `starters.ts`, `recipes.ts`, `timers.ts`, `bakes.ts`, `ollama.ts`, `units.ts` (weight + temp unit, localStorage-persisted), `theme.ts`
 - `api/` — typed fetch wrappers; all requests go through `/api` prefix (proxied by nginx in Docker)
 
 ### Ollama Integration
@@ -69,15 +69,20 @@ Ollama runs on host or as separate Docker service. All requests include a sourdo
 - **Baker chat:** `/chat` view, multi-turn conversation, full message history sent each request
 
 ### Data Model
-- `Starter` → many `Feeding` (flour/water/starter grams, height_mm, ambient_temp_f, notes)
+- `Starter` → many `Feeding` (flour/water/starter grams, height_mm, ambient_temp_f, flour_type, flour_brand, notes)
 - `Starter` fields: `feed_interval_hours` (reminder), `archived` (soft delete)
 - `Recipe` → many `RecipeStep` (ordered, optional duration_minutes)
-- `Bake` → optional FK to `Starter` and `Recipe`; records hydration, oven temp, outcome, notes
+- `Bake` → optional FK to `Starter` and `Recipe`; records baked_at (user-settable date), hydration, oven temp (stored °F), outcome, tags (comma-sep string), notes
 - `Timer` → optional FK to `RecipeStep`
 - `Setting` — key/value store for Ollama URL/model overrides (survives restarts)
 
 ### DB Migrations
 New columns are added via `app/migrate.py` at startup using `PRAGMA table_info` + `ALTER TABLE ADD COLUMN`. Safe for existing installs — columns only added if missing.
+
+Migrations tracked:
+- `feedings`: `height_mm`, `ambient_temp_f`, `flour_type`, `flour_brand`
+- `starters`: `feed_interval_hours`, `archived`
+- `bakes`: `tags`
 
 ## Features
 
@@ -91,10 +96,14 @@ New columns are added via `app/migrate.py` at startup using `PRAGMA table_info` 
 | Recipe step check-off | RecipeCard — click step to mark done |
 | Recipe scaling | RecipeCard — scale × input, durations update, weight banner shown |
 | Timers | TimersView |
-| Bake log | BakesView — links starter + recipe, records outcome |
+| Bake log | BakesView — links starter + recipe, records outcome, bake date, tags |
+| Bake date | BakesView — datetime-local picker; defaults to server time if omitted |
+| Bake tags | BakesView — comma-sep tags shown as pills on BakeCard |
+| Flour type + brand on feedings | StarterCard — datalist suggestions for type; freetext brand; displayed in FeedingLog |
 | Baker chat (Ollama) | ChatView — multi-turn sourdough expert Q&A |
 | Hydration calculator | HydrationView — flour/hydration/starter → added water |
-| Unit setting (g/oz/cup) | Settings → Units; applies to all weight inputs + feeding display |
+| Unit setting (g/oz/cup) | Settings → Units (weight); applies to all weight inputs + feeding display |
+| Temperature unit (°F/°C) | Settings → Units (temp); all temp inputs + display convert; stored as °F |
 | Dark mode | ◑ toggle in nav, persists to localStorage |
 | Data export | Settings → Download Backup (JSON) |
 | Data import | Settings → Import Backup (file picker) |

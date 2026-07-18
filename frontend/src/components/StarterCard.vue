@@ -29,7 +29,24 @@
           <div><label>Flour ({{ units.label }})</label><input v-model.number="feed.flour_display" type="number" /></div>
           <div><label>Water ({{ units.label }})</label><input v-model.number="feed.water_display" type="number" /></div>
           <div><label>Height (mm)</label><input v-model.number="feed.height_mm" type="number" /></div>
-          <div><label>Temp (°F)</label><input v-model.number="feed.ambient_temp_f" type="number" /></div>
+          <div><label>Temp ({{ units.tempLabel }})</label><input v-model.number="feed.temp_display" type="number" /></div>
+        </div>
+        <div class="form-row" style="margin-top:0.4rem">
+          <div>
+            <label>Flour type</label>
+            <input v-model="feed.flour_type" list="flour-types" placeholder="e.g. AP, Bread, Whole Wheat" />
+            <datalist id="flour-types">
+              <option value="All-Purpose" />
+              <option value="Bread" />
+              <option value="Whole Wheat" />
+              <option value="Rye" />
+              <option value="Spelt" />
+              <option value="Einkorn" />
+              <option value="Semolina" />
+              <option value="00" />
+            </datalist>
+          </div>
+          <div><label>Flour brand</label><input v-model="feed.flour_brand" placeholder="e.g. King Arthur" /></div>
         </div>
         <input v-model="feed.notes" placeholder="Notes (optional)" style="margin-top:0.4rem" />
         <button class="btn-primary btn-sm" style="margin-top:0.5rem" @click="submitFeeding">Log Feeding</button>
@@ -72,7 +89,9 @@ const feed = reactive({
   flour_display: undefined as number | undefined,
   water_display: undefined as number | undefined,
   height_mm: undefined as number | undefined,
-  ambient_temp_f: undefined as number | undefined,
+  temp_display: undefined as number | undefined,
+  flour_type: '',
+  flour_brand: '',
   notes: '',
 })
 const intervalHours = ref<number | undefined>(props.starter.feed_interval_hours ?? undefined)
@@ -90,14 +109,18 @@ async function submitFeeding() {
     flour_grams: units.toGrams(feed.flour_display) ?? undefined,
     water_grams: units.toGrams(feed.water_display) ?? undefined,
     height_mm: feed.height_mm,
-    ambient_temp_f: feed.ambient_temp_f,
+    ambient_temp_f: units.toStoredTempF(feed.temp_display) ?? undefined,
+    flour_type: feed.flour_type || undefined,
+    flour_brand: feed.flour_brand || undefined,
     notes: feed.notes || undefined,
   })
   feed.starter_display = undefined
   feed.flour_display = undefined
   feed.water_display = undefined
   feed.height_mm = undefined
-  feed.ambient_temp_f = undefined
+  feed.temp_display = undefined
+  feed.flour_type = ''
+  feed.flour_brand = ''
   feed.notes = ''
 }
 

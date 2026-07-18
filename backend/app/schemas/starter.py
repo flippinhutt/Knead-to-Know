@@ -9,6 +9,8 @@ class FeedingCreate(BaseModel):
     starter_grams: float | None = None
     height_mm: int | None = None
     ambient_temp_f: int | None = None
+    flour_type: str | None = None
+    flour_brand: str | None = None
     notes: str | None = None
 
 

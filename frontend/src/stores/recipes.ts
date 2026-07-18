@@ -31,9 +31,15 @@ export const useRecipesStore = defineStore('recipes', () => {
     recipes.value = recipes.value.filter((r) => r.id !== id)
   }
 
-  async function importFromText(raw_text: string, model?: string): Promise<RecipeImportPreview> {
-    return recipesApi.import(raw_text, model)
+  async function replaceSteps(id: number, steps: Array<{ order: number; description: string; duration_minutes?: number | null }>) {
+    const updated = await recipesApi.replaceSteps(id, steps)
+    recipes.value = recipes.value.map((r) => (r.id === id ? updated : r))
+    return updated
   }
 
-  return { recipes, loading, error, fetchAll, create, remove, importFromText }
+  async function importRecipe(params: { raw_text?: string; url?: string; model?: string }): Promise<RecipeImportPreview> {
+    return recipesApi.import(params)
+  }
+
+  return { recipes, loading, error, fetchAll, create, remove, replaceSteps, importRecipe }
 })

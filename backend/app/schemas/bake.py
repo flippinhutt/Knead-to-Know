@@ -6,10 +6,12 @@ from pydantic import BaseModel
 class BakeCreate(BaseModel):
     starter_id: int | None = None
     recipe_id: int | None = None
+    baked_at: datetime | None = None
     hydration_percent: float | None = None
     oven_temp_f: int | None = None
     outcome: str | None = None
     notes: str | None = None
+    tags: str | None = None
 
 
 class BakeOut(BakeCreate):

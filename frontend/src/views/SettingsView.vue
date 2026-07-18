@@ -23,6 +23,7 @@
 
     <div class="card" style="margin-bottom:1rem">
       <h2 style="margin-bottom:0.75rem;font-size:1rem">Units</h2>
+      <p class="unit-section-label">Weight</p>
       <div class="unit-row">
         <label v-for="u in unitOptions" :key="u.value" class="unit-option">
           <input type="radio" :value="u.value" v-model="selectedUnit" @change="units.setUnit(u.value as any)" />
@@ -30,6 +31,13 @@
         </label>
       </div>
       <p class="muted" style="font-size:0.78rem;margin-top:0.4rem">Cups are approximate (240g = 1 cup). Grams recommended for precision baking.</p>
+      <p class="unit-section-label" style="margin-top:0.75rem">Temperature</p>
+      <div class="unit-row">
+        <label v-for="t in tempOptions" :key="t.value" class="unit-option">
+          <input type="radio" :value="t.value" v-model="selectedTempUnit" @change="units.setTempUnit(t.value as any)" />
+          {{ t.label }}
+        </label>
+      </div>
     </div>
 
     <div class="card" style="margin-bottom:1rem">
@@ -82,10 +90,15 @@ import { apiFetch } from '@/api'
 const store = useOllamaStore()
 const units = useUnitsStore()
 const selectedUnit = ref(units.unit)
+const selectedTempUnit = ref(units.tempUnit)
 const unitOptions = [
   { value: 'g', label: 'Grams (g)' },
   { value: 'oz', label: 'Ounces (oz)' },
   { value: 'cup', label: 'Cups (approx)' },
+]
+const tempOptions = [
+  { value: 'f', label: 'Fahrenheit (°F)' },
+  { value: 'c', label: 'Celsius (°C)' },
 ]
 const importMsg = ref<{ ok: boolean; text: string } | null>(null)
 
@@ -148,6 +161,7 @@ function formatSize(bytes: number | null) {
 
 <style scoped>
 h1 { font-size: 1.4rem; }
+.unit-section-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.3rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 .unit-row { display: flex; gap: 1.25rem; }
 .unit-option { display: flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; cursor: pointer; }
 .unit-option input { width: auto; }

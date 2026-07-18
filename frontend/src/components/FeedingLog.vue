@@ -9,7 +9,8 @@
       <span v-if="f.flour_grams">{{ units.toDisplay(f.flour_grams) }}{{ units.label }} flour</span>
       <span v-if="f.water_grams">{{ units.toDisplay(f.water_grams) }}{{ units.label }} water</span>
       <span v-if="f.height_mm" class="height">{{ f.height_mm }}mm</span>
-      <span v-if="f.ambient_temp_f" class="temp">{{ f.ambient_temp_f }}°F</span>
+      <span v-if="f.ambient_temp_f" class="temp">{{ units.toDisplayTemp(f.ambient_temp_f) }}{{ units.tempLabel }}</span>
+      <span v-if="f.flour_type || f.flour_brand" class="flour">{{ [f.flour_brand, f.flour_type].filter(Boolean).join(' ') }}</span>
       <span v-if="f.notes" class="note">— {{ f.notes }}</span>
     </div>
   </div>
@@ -48,5 +49,6 @@ function formatDate(iso: string) {
 .date { color: var(--text-muted); min-width: 110px; }
 .height { color: var(--accent); font-weight: 500; }
 .temp { color: #d97706; font-weight: 500; }
+.flour { color: #7c3aed; font-size: 0.78rem; }
 .note { color: var(--text-muted); font-style: italic; }
 </style>
