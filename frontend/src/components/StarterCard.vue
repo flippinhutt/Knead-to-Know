@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" :class="{ archived: starter.archived }">
     <div class="card-header">
       <div>
         <h3>{{ starter.name }}</h3>
@@ -8,6 +8,9 @@
       </div>
       <div class="header-actions">
         <span v-if="isOverdue" class="badge-overdue">Feed me!</span>
+        <button class="btn-sm btn-ghost" @click="toggleArchive">
+          {{ starter.archived ? 'Restore' : 'Archive' }}
+        </button>
         <button class="btn-danger btn-sm" @click="$emit('deleted')">Delete</button>
       </div>
     </div>
@@ -18,13 +21,13 @@
       <span v-if="starter.feed_interval_hours" class="interval-tag">every {{ starter.feed_interval_hours }}h</span>
     </div>
 
-    <details>
+    <details v-if="!starter.archived">
       <summary>Add feeding</summary>
       <div class="feeding-form">
         <div class="form-row">
-          <div><label>Starter (g)</label><input v-model.number="feed.starter_grams" type="number" /></div>
-          <div><label>Flour (g)</label><input v-model.number="feed.flour_grams" type="number" /></div>
-          <div><label>Water (g)</label><input v-model.number="feed.water_grams" type="number" /></div>
+          <div><label>Starter ({{ units.label }})</label><input v-model.number="feed.starter_display" type="number" /></div>
+          <div><label>Flour ({{ units.label }})</label><input v-model.number="feed.flour_display" type="number" /></div>
+          <div><label>Water ({{ units.label }})</label><input v-model.number="feed.water_display" type="number" /></div>
           <div><label>Height (mm)</label><input v-model.number="feed.height_mm" type="number" /></div>
           <div><label>Temp (°F)</label><input v-model.number="feed.ambient_temp_f" type="number" /></div>
         </div>
@@ -33,7 +36,7 @@
       </div>
     </details>
 
-    <details>
+    <details v-if="!starter.archived">
       <summary>Reminder interval</summary>
       <div class="interval-form">
         <label>Feed every</label>
@@ -55,16 +58,19 @@
 import { computed, reactive, ref } from 'vue'
 import type { Starter } from '@/types'
 import { useStartersStore } from '@/stores/starters'
+import { useUnitsStore } from '@/stores/units'
 import FeedingLog from './FeedingLog.vue'
 
 const props = defineProps<{ starter: Starter }>()
 defineEmits<{ deleted: [] }>()
 
 const store = useStartersStore()
+const units = useUnitsStore()
+
 const feed = reactive({
-  starter_grams: undefined as number | undefined,
-  flour_grams: undefined as number | undefined,
-  water_grams: undefined as number | undefined,
+  starter_display: undefined as number | undefined,
+  flour_display: undefined as number | undefined,
+  water_display: undefined as number | undefined,
   height_mm: undefined as number | undefined,
   ambient_temp_f: undefined as number | undefined,
   notes: '',
@@ -80,16 +86,16 @@ const isOverdue = computed(() => {
 
 async function submitFeeding() {
   await store.addFeeding(props.starter.id, {
-    starter_grams: feed.starter_grams,
-    flour_grams: feed.flour_grams,
-    water_grams: feed.water_grams,
+    starter_grams: units.toGrams(feed.starter_display) ?? undefined,
+    flour_grams: units.toGrams(feed.flour_display) ?? undefined,
+    water_grams: units.toGrams(feed.water_display) ?? undefined,
     height_mm: feed.height_mm,
     ambient_temp_f: feed.ambient_temp_f,
     notes: feed.notes || undefined,
   })
-  feed.starter_grams = undefined
-  feed.flour_grams = undefined
-  feed.water_grams = undefined
+  feed.starter_display = undefined
+  feed.flour_display = undefined
+  feed.water_display = undefined
   feed.height_mm = undefined
   feed.ambient_temp_f = undefined
   feed.notes = ''
@@ -104,6 +110,10 @@ async function clearInterval() {
   await store.update(props.starter.id, { feed_interval_hours: undefined })
 }
 
+async function toggleArchive() {
+  await store.update(props.starter.id, { archived: !props.starter.archived })
+}
+
 function timeAgo(isoDate: string) {
   const diff = Date.now() - new Date(isoDate).getTime()
   const h = Math.floor(diff / 3.6e6)
@@ -114,6 +124,8 @@ function timeAgo(isoDate: string) {
 </script>
 
 <style scoped>
+.card { transition: opacity 0.2s; }
+.card.archived { opacity: 0.55; }
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 h3 { font-size: 1rem; font-weight: 600; }
 .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem; }

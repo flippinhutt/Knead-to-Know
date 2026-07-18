@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -12,8 +12,11 @@ router = APIRouter(prefix="/starters", tags=["starters"])
 
 
 @router.get("/", response_model=list[StarterOut])
-def list_starters(db: Session = Depends(get_db)):
-    return db.query(Starter).all()
+def list_starters(show_archived: bool = Query(False), db: Session = Depends(get_db)):
+    q = db.query(Starter)
+    if not show_archived:
+        q = q.filter(Starter.archived.is_(False))
+    return q.all()
 
 
 @router.post("/", response_model=StarterOut, status_code=201)

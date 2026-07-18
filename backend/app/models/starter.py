@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -14,6 +14,7 @@ class Starter(Base):
     description: Mapped[str | None] = mapped_column(String(500))
     hydration_percent: Mapped[float | None]
     feed_interval_hours: Mapped[int | None]
+    archived: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     feedings: Mapped[list["Feeding"]] = relationship(  # noqa: F821

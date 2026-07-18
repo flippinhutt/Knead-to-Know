@@ -9,6 +9,9 @@
       <RouterLink to="/chat" :class="{ active: route.path === '/chat' }">Chat</RouterLink>
       <RouterLink to="/hydration" :class="{ active: route.path === '/hydration' }">Hydration</RouterLink>
       <RouterLink to="/settings" :class="{ active: route.path === '/settings' }">Settings</RouterLink>
+      <button class="theme-toggle" @click="theme.toggle" :title="theme.dark ? 'Light mode' : 'Dark mode'">
+        {{ theme.dark ? '☀' : '◑' }}
+      </button>
     </nav>
     <main class="main">
       <RouterView />
@@ -18,7 +21,9 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import { useThemeStore } from '@/stores/theme'
 const route = useRoute()
+const theme = useThemeStore()
 </script>
 
 <style scoped>
@@ -34,6 +39,7 @@ const route = useRoute()
 }
 
 .nav-brand { font-weight: 700; color: var(--accent); margin-right: auto; font-size: 1.1rem; }
+.theme-toggle { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 0.2rem 0.5rem; border-radius: var(--radius); cursor: pointer; font-size: 1rem; line-height: 1; }
 
 .nav a { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
 .nav a.active, .nav a:hover { color: var(--accent); }

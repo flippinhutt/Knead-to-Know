@@ -14,5 +14,7 @@ def run_migrations():
         starters_cols = {row[1] for row in conn.execute(text("PRAGMA table_info(starters)")).fetchall()}
         if "feed_interval_hours" not in starters_cols:
             conn.execute(text("ALTER TABLE starters ADD COLUMN feed_interval_hours INTEGER"))
+        if "archived" not in starters_cols:
+            conn.execute(text("ALTER TABLE starters ADD COLUMN archived INTEGER NOT NULL DEFAULT 0"))
 
         conn.commit()

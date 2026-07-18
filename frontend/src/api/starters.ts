@@ -2,11 +2,11 @@ import type { Feeding, Starter } from '@/types'
 import { apiFetch } from './index'
 
 export const startersApi = {
-  list: () => apiFetch<Starter[]>('/starters/'),
+  list: (showArchived = false) => apiFetch<Starter[]>(`/starters/${showArchived ? '?show_archived=true' : ''}`),
   get: (id: number) => apiFetch<Starter>(`/starters/${id}`),
   create: (data: { name: string; description?: string; hydration_percent?: number }) =>
     apiFetch<Starter>('/starters/', { method: 'POST', body: JSON.stringify(data) }),
-  update: (id: number, data: Partial<{ name: string; description: string; hydration_percent: number; feed_interval_hours: number }>) =>
+  update: (id: number, data: Partial<{ name: string; description: string; hydration_percent: number; feed_interval_hours: number; archived: boolean }>) =>
     apiFetch<Starter>(`/starters/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id: number) => apiFetch<void>(`/starters/${id}`, { method: 'DELETE' }),
   addFeeding: (

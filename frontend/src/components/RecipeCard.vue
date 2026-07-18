@@ -7,10 +7,17 @@
         <p v-if="recipe.source" class="meta source">Source: {{ recipe.source }}</p>
       </div>
       <div class="header-actions">
+        <div class="scale-control">
+          <label>Scale</label>
+          <input v-model.number="scale" type="number" min="0.25" max="10" step="0.25" style="width:60px" />
+          <span>×</span>
+        </div>
         <button v-if="anyChecked" class="btn-sm btn-ghost" @click="clearAll">Reset</button>
         <button class="btn-danger btn-sm" @click="$emit('deleted')">Delete</button>
       </div>
     </div>
+
+    <div v-if="scale !== 1" class="scale-banner">Multiply all weights by {{ scale }}×</div>
 
     <div v-if="recipe.steps.length" class="steps">
       <div
@@ -26,7 +33,7 @@
         </span>
         <div class="step-body">
           <p>{{ step.description }}</p>
-          <span v-if="step.duration_minutes" class="tag">{{ step.duration_minutes }} min</span>
+          <span v-if="step.duration_minutes" class="tag">{{ Math.round(step.duration_minutes * scale) }} min</span>
         </div>
       </div>
     </div>
@@ -40,6 +47,7 @@ import type { Recipe } from '@/types'
 defineProps<{ recipe: Recipe }>()
 defineEmits<{ deleted: [] }>()
 
+const scale = ref(1)
 const checked = ref(new Set<number>())
 const anyChecked = computed(() => checked.value.size > 0)
 
@@ -61,6 +69,10 @@ h3 { font-size: 1rem; font-weight: 600; }
 .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; }
 .source { font-style: italic; }
 .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+.scale-control { display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; color: var(--text-muted); }
+.scale-control input { width: 52px; padding: 0.15rem 0.3rem; font-size: 0.8rem; }
+.scale-control label { margin: 0; }
+.scale-banner { font-size: 0.8rem; background: var(--border); color: var(--text-muted); padding: 0.25rem 0.6rem; border-radius: 4px; margin-bottom: 0.5rem; }
 .btn-ghost { background: none; border: 1px solid var(--border, #ccc); color: var(--text-muted); border-radius: 4px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.75rem; }
 .steps { display: flex; flex-direction: column; gap: 0.5rem; }
 .step { display: flex; gap: 0.75rem; cursor: pointer; user-select: none; }

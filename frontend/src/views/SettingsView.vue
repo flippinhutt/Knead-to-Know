@@ -22,9 +22,27 @@
     </div>
 
     <div class="card" style="margin-bottom:1rem">
+      <h2 style="margin-bottom:0.75rem;font-size:1rem">Units</h2>
+      <div class="unit-row">
+        <label v-for="u in unitOptions" :key="u.value" class="unit-option">
+          <input type="radio" :value="u.value" v-model="selectedUnit" @change="units.setUnit(u.value as any)" />
+          {{ u.label }}
+        </label>
+      </div>
+      <p class="muted" style="font-size:0.78rem;margin-top:0.4rem">Cups are approximate (240g = 1 cup). Grams recommended for precision baking.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
       <h2 style="margin-bottom:0.75rem;font-size:1rem">Data</h2>
-      <p class="muted" style="margin-bottom:0.75rem;font-size:0.82rem">Download all starters, feedings, recipes, and bakes as JSON.</p>
-      <a class="btn-primary btn-sm" href="/api/export/" download="knead-to-know-export.json">Download Backup</a>
+      <p class="muted" style="margin-bottom:0.75rem;font-size:0.82rem">Download or restore all starters, feedings, recipes, and bakes.</p>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+        <a class="btn-primary btn-sm" href="/api/export/" download="knead-to-know-export.json">Download Backup</a>
+        <label class="btn-secondary btn-sm" style="cursor:pointer">
+          Import Backup
+          <input type="file" accept=".json" style="display:none" @change="importFile" />
+        </label>
+        <span v-if="importMsg" :class="importMsg.ok ? 'ok-msg' : 'error'">{{ importMsg.text }}</span>
+      </div>
     </div>
 
     <div class="card">
@@ -58,8 +76,36 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useOllamaStore } from '@/stores/ollama'
+import { useUnitsStore } from '@/stores/units'
+import { apiFetch } from '@/api'
 
 const store = useOllamaStore()
+const units = useUnitsStore()
+const selectedUnit = ref(units.unit)
+const unitOptions = [
+  { value: 'g', label: 'Grams (g)' },
+  { value: 'oz', label: 'Ounces (oz)' },
+  { value: 'cup', label: 'Cups (approx)' },
+]
+const importMsg = ref<{ ok: boolean; text: string } | null>(null)
+
+async function importFile(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  try {
+    const json = JSON.parse(await file.text())
+    const res = await apiFetch<{ imported: Record<string, number> }>('/import/', {
+      method: 'POST',
+      body: JSON.stringify(json),
+    })
+    const i = res.imported
+    importMsg.value = { ok: true, text: `Imported: ${i.starters} starters, ${i.recipes} recipes, ${i.bakes} bakes` }
+  } catch (err) {
+    importMsg.value = { ok: false, text: `Import failed: ${(err as Error).message}` }
+  }
+  ;(e.target as HTMLInputElement).value = ''
+}
+
 const urlInput = ref('')
 const modelInput = ref('')
 const pullName = ref('')
@@ -102,6 +148,10 @@ function formatSize(bytes: number | null) {
 
 <style scoped>
 h1 { font-size: 1.4rem; }
+.unit-row { display: flex; gap: 1.25rem; }
+.unit-option { display: flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; cursor: pointer; }
+.unit-option input { width: auto; }
+.ok-msg { color: var(--success); font-size: 0.82rem; }
 .model-list { display: flex; flex-direction: column; gap: 0.4rem; }
 .model-row { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
 .muted { color: var(--text-muted); font-size: 0.875rem; }

@@ -8,11 +8,11 @@ export const useStartersStore = defineStore('starters', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchAll() {
+  async function fetchAll(showArchived = false) {
     loading.value = true
     error.value = null
     try {
-      starters.value = await startersApi.list()
+      starters.value = await startersApi.list(showArchived)
     } catch (e) {
       error.value = (e as Error).message
     } finally {
@@ -26,7 +26,7 @@ export const useStartersStore = defineStore('starters', () => {
     return starter
   }
 
-  async function update(id: number, data: Partial<{ name: string; description: string; hydration_percent: number; feed_interval_hours: number }>) {
+  async function update(id: number, data: Partial<{ name: string; description: string; hydration_percent: number; feed_interval_hours: number; archived: boolean }>) {
     const updated = await startersApi.update(id, data)
     starters.value = starters.value.map((s) => (s.id === id ? updated : s))
     return updated

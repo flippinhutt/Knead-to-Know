@@ -16,6 +16,7 @@ export interface Starter {
   description: string | null
   hydration_percent: number | null
   feed_interval_hours: number | null
+  archived: boolean
   created_at: string
   feedings: Feeding[]
 }

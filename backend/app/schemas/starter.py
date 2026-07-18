@@ -32,6 +32,7 @@ class StarterUpdate(BaseModel):
     description: str | None = None
     hydration_percent: float | None = None
     feed_interval_hours: int | None = None
+    archived: bool | None = None
 
 
 class StarterOut(BaseModel):
@@ -40,6 +41,7 @@ class StarterOut(BaseModel):
     description: str | None
     hydration_percent: float | None
     feed_interval_hours: int | None
+    archived: bool
     created_at: datetime
     feedings: list[FeedingOut] = []
 

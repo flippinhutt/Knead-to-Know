@@ -1,6 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
+:root,
+[data-theme="light"] {
   --bg: #faf7f2;
   --surface: #fff;
   --border: #e8e0d5;
@@ -12,6 +13,20 @@
   --success: #27ae60;
   --radius: 8px;
   --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+[data-theme="dark"] {
+  --bg: #1c1814;
+  --surface: #252018;
+  --border: #3c342a;
+  --text: #f0e8dc;
+  --text-muted: #9a8a76;
+  --accent: #c4844a;
+  --accent-hover: #d49458;
+  --danger: #e05c4a;
+  --success: #4caf70;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 body {

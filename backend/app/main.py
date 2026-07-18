@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db import create_tables
 from app.migrate import run_migrations
 from app.routers import bakes, ollama, recipes, starters, timers
-from app.routers import export_data
+from app.routers import export_data, import_data
 
 
 @asynccontextmanager
@@ -30,6 +30,7 @@ app.include_router(recipes.router, prefix="/api")
 app.include_router(timers.router, prefix="/api")
 app.include_router(bakes.router, prefix="/api")
 app.include_router(export_data.router, prefix="/api")
+app.include_router(import_data.router, prefix="/api")
 app.include_router(ollama.router, prefix="/api")
 
 
