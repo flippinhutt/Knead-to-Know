@@ -41,6 +41,13 @@ async def pull_model(base_url: str, model_name: str) -> AsyncIterator[str]:
                     yield line
 
 
+SYSTEM_PROMPT = """\
+You are an expert sourdough baker with deep knowledge of fermentation, \
+hydration ratios, starter maintenance, crumb structure, and baking schedules. \
+You help bakers understand and execute sourdough recipes with precision. \
+When parsing recipes, you identify timing, temperatures, and techniques accurately.\
+"""
+
 RECIPE_PROMPT = """\
 Parse this sourdough recipe into JSON. Return ONLY valid JSON, no explanation.
 
@@ -62,7 +69,12 @@ async def import_recipe(base_url: str, model: str, raw_text: str) -> dict:
     async with httpx.AsyncClient() as client:
         r = await client.post(
             f"{base_url}/api/generate",
-            json={"model": model, "prompt": RECIPE_PROMPT.format(raw_text=raw_text), "stream": False},
+            json={
+                "model": model,
+                "system": SYSTEM_PROMPT,
+                "prompt": RECIPE_PROMPT.format(raw_text=raw_text),
+                "stream": False,
+            },
             timeout=120.0,
         )
         r.raise_for_status()
