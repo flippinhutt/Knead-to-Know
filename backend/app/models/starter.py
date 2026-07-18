@@ -13,6 +13,7 @@ class Starter(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(String(500))
     hydration_percent: Mapped[float | None]
+    feed_interval_hours: Mapped[int | None]
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     feedings: Mapped[list["Feeding"]] = relationship(  # noqa: F821

@@ -5,6 +5,9 @@
       <RouterLink to="/" :class="{ active: route.path === '/' }">Starters</RouterLink>
       <RouterLink to="/recipes" :class="{ active: route.path === '/recipes' }">Recipes</RouterLink>
       <RouterLink to="/timers" :class="{ active: route.path === '/timers' }">Timers</RouterLink>
+      <RouterLink to="/bakes" :class="{ active: route.path === '/bakes' }">Bakes</RouterLink>
+      <RouterLink to="/chat" :class="{ active: route.path === '/chat' }">Chat</RouterLink>
+      <RouterLink to="/hydration" :class="{ active: route.path === '/hydration' }">Hydration</RouterLink>
       <RouterLink to="/settings" :class="{ active: route.path === '/settings' }">Settings</RouterLink>
     </nav>
     <main class="main">

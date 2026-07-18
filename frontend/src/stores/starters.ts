@@ -26,7 +26,7 @@ export const useStartersStore = defineStore('starters', () => {
     return starter
   }
 
-  async function update(id: number, data: Partial<{ name: string; description: string; hydration_percent: number }>) {
+  async function update(id: number, data: Partial<{ name: string; description: string; hydration_percent: number; feed_interval_hours: number }>) {
     const updated = await startersApi.update(id, data)
     starters.value = starters.value.map((s) => (s.id === id ? updated : s))
     return updated
@@ -37,7 +37,7 @@ export const useStartersStore = defineStore('starters', () => {
     starters.value = starters.value.filter((s) => s.id !== id)
   }
 
-  async function addFeeding(starterId: number, data: { flour_grams?: number; water_grams?: number; starter_grams?: number; notes?: string }): Promise<Feeding> {
+  async function addFeeding(starterId: number, data: { flour_grams?: number; water_grams?: number; starter_grams?: number; height_mm?: number; notes?: string }): Promise<Feeding> {
     const feeding = await startersApi.addFeeding(starterId, data)
     starters.value = starters.value.map((s) =>
       s.id === starterId ? { ...s, feedings: [feeding, ...s.feedings] } : s,

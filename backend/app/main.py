@@ -4,12 +4,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import create_tables
-from app.routers import ollama, recipes, starters, timers
+from app.migrate import run_migrations
+from app.routers import bakes, ollama, recipes, starters, timers
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
+    run_migrations()
     yield
 
 
@@ -25,6 +27,7 @@ app.add_middleware(
 app.include_router(starters.router, prefix="/api")
 app.include_router(recipes.router, prefix="/api")
 app.include_router(timers.router, prefix="/api")
+app.include_router(bakes.router, prefix="/api")
 app.include_router(ollama.router, prefix="/api")
 
 

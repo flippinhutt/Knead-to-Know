@@ -65,6 +65,21 @@ Recipe:
 """
 
 
+async def chat(base_url: str, model: str, messages: list[dict]) -> str:
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{base_url}/api/chat",
+            json={
+                "model": model,
+                "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+                "stream": False,
+            },
+            timeout=120.0,
+        )
+        r.raise_for_status()
+        return r.json()["message"]["content"]
+
+
 async def import_recipe(base_url: str, model: str, raw_text: str) -> dict:
     async with httpx.AsyncClient() as client:
         r = await client.post(

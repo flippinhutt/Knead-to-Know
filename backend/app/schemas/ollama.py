@@ -19,3 +19,16 @@ class OllamaConfigUpdate(BaseModel):
 
 class PullRequest(BaseModel):
     model: str
+
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
+
+
+class ChatResponse(BaseModel):
+    reply: str

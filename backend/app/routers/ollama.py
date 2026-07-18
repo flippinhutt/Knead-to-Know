@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models.setting import Setting
-from app.schemas.ollama import OllamaConfig, OllamaConfigUpdate, OllamaModel, PullRequest
+from app.schemas.ollama import ChatRequest, ChatResponse, OllamaConfig, OllamaConfigUpdate, OllamaModel, PullRequest
 from app.services import ollama as ollama_service
 
 router = APIRouter(prefix="/ollama", tags=["ollama"])
@@ -38,6 +38,20 @@ async def list_models(db: Session = Depends(get_db)):
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Cannot reach Ollama: {exc}") from exc
     return [OllamaModel(**m) for m in models]
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(body: ChatRequest, db: Session = Depends(get_db)):
+    config = ollama_service.resolved_config(db)
+    try:
+        reply = await ollama_service.chat(
+            config["ollama_base_url"],
+            config["ollama_model"],
+            [m.model_dump() for m in body.messages],
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Cannot reach Ollama: {exc}") from exc
+    return ChatResponse(reply=reply)
 
 
 @router.post("/pull")

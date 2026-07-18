@@ -15,6 +15,7 @@ class Feeding(Base):
     flour_grams: Mapped[float | None]
     water_grams: Mapped[float | None]
     starter_grams: Mapped[float | None]
+    height_mm: Mapped[int | None]
     notes: Mapped[str | None] = mapped_column(String(500))
 
     starter: Mapped["Starter"] = relationship(back_populates="feedings")  # noqa: F821

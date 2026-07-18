@@ -7,6 +7,7 @@ class FeedingCreate(BaseModel):
     flour_grams: float | None = None
     water_grams: float | None = None
     starter_grams: float | None = None
+    height_mm: int | None = None
     notes: str | None = None
 
 
@@ -22,12 +23,14 @@ class StarterCreate(BaseModel):
     name: str
     description: str | None = None
     hydration_percent: float | None = None
+    feed_interval_hours: int | None = None
 
 
 class StarterUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     hydration_percent: float | None = None
+    feed_interval_hours: int | None = None
 
 
 class StarterOut(BaseModel):
@@ -35,6 +38,7 @@ class StarterOut(BaseModel):
     name: str
     description: str | None
     hydration_percent: float | None
+    feed_interval_hours: int | None
     created_at: datetime
     feedings: list[FeedingOut] = []
 

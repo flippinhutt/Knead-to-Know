@@ -5,6 +5,7 @@ export interface Feeding {
   flour_grams: number | null
   water_grams: number | null
   starter_grams: number | null
+  height_mm: number | null
   notes: string | null
 }
 
@@ -13,8 +14,25 @@ export interface Starter {
   name: string
   description: string | null
   hydration_percent: number | null
+  feed_interval_hours: number | null
   created_at: string
   feedings: Feeding[]
+}
+
+export interface Bake {
+  id: number
+  starter_id: number | null
+  recipe_id: number | null
+  baked_at: string
+  hydration_percent: number | null
+  oven_temp_f: number | null
+  outcome: string | null
+  notes: string | null
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
 }
 
 export interface RecipeStep {
