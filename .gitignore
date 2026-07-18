@@ -8,6 +8,7 @@ backend/.pytest_cache/
 *.db
 
 # Env
+.env
 backend/.env
 
 # Node
