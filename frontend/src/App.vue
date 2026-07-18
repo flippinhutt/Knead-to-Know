@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <nav class="nav">
-      <span class="nav-brand">Sourdough</span>
+      <span class="nav-brand">Knead to Know</span>
       <RouterLink to="/" :class="{ active: route.path === '/' }">Starters</RouterLink>
       <RouterLink to="/recipes" :class="{ active: route.path === '/recipes' }">Recipes</RouterLink>
       <RouterLink to="/timers" :class="{ active: route.path === '/timers' }">Timers</RouterLink>
