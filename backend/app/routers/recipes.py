@@ -3,6 +3,7 @@ from html.parser import HTMLParser
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -13,25 +14,33 @@ from app.services import ollama as ollama_service
 
 class _TextExtractor(HTMLParser):
     _SKIP = {"script", "style", "nav", "header", "footer", "aside", "noscript"}
+    _HEADINGS = {"h1", "h2", "h3"}
 
     def __init__(self) -> None:
         super().__init__()
         self._parts: list[str] = []
         self._depth = 0
+        self._current_tag: str | None = None
 
     def handle_starttag(self, tag: str, attrs: object) -> None:
         if tag in self._SKIP:
             self._depth += 1
+        self._current_tag = tag
 
     def handle_endtag(self, tag: str) -> None:
         if tag in self._SKIP and self._depth > 0:
             self._depth -= 1
+        if tag == self._current_tag:
+            self._current_tag = None
 
     def handle_data(self, data: str) -> None:
         if self._depth == 0:
             stripped = data.strip()
             if stripped:
-                self._parts.append(stripped)
+                if self._current_tag in self._HEADINGS:
+                    self._parts.append(f"## {stripped}")
+                else:
+                    self._parts.append(stripped)
 
     def text(self) -> str:
         return "\n".join(self._parts)
@@ -189,4 +198,7 @@ async def import_recipe(body: RecipeImportRequest, db: Session = Depends(get_db)
         parsed = await ollama_service.import_recipe(config["ollama_base_url"], model, raw_text)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Ollama error: {exc}") from exc
-    return RecipeImportPreview(**parsed)
+    try:
+        return RecipeImportPreview(**parsed)
+    except ValidationError as exc:
+        raise HTTPException(status_code=502, detail=f"Ollama returned unexpected recipe shape: {exc}") from exc

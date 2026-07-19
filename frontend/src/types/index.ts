@@ -44,6 +44,7 @@ export interface RecipeStep {
   id?: number
   recipe_id?: number
   order: number
+  title?: string | null
   description: string
   duration_minutes: number | null
 }

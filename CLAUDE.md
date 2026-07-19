@@ -65,13 +65,13 @@ docker compose logs -f api    # tail backend logs
 
 ### Ollama Integration
 Ollama runs on host or as separate Docker service. All requests include a sourdough expert system prompt.
-- **Recipe import:** paste raw text → `/api/recipes/import` → Ollama parses → user confirms → saved
+- **Recipe import:** paste raw text, or fetch a URL → `/api/recipes/import`. URL fetch tries JSON-LD `Recipe` first; else flattens page HTML to text, tagging `h1`/`h2`/`h3` lines with `## ` so Ollama maps heading → step `title`, following text → step `description` → user confirms → saved
 - **Baker chat:** `/chat` view, multi-turn conversation, full message history sent each request
 
 ### Data Model
 - `Starter` → many `Feeding` (flour/water/starter grams, height_mm, ambient_temp_f, flour_type, flour_brand, notes)
 - `Starter` fields: `feed_interval_hours` (reminder), `archived` (soft delete)
-- `Recipe` → many `RecipeStep` (ordered, optional duration_minutes)
+- `Recipe` → many `RecipeStep` (ordered, optional title, optional duration_minutes)
 - `Bake` → optional FK to `Starter` and `Recipe`; records baked_at (user-settable date), hydration, oven temp (stored °F), outcome, tags (comma-sep string), notes
 - `Timer` → optional FK to `RecipeStep`
 - `Setting` — key/value store for Ollama URL/model overrides (survives restarts)
@@ -83,6 +83,7 @@ Migrations tracked:
 - `feedings`: `height_mm`, `ambient_temp_f`, `flour_type`, `flour_brand`
 - `starters`: `feed_interval_hours`, `archived`
 - `bakes`: `tags`
+- `recipe_steps`: `title`
 
 ## Features
 
@@ -92,7 +93,7 @@ Migrations tracked:
 | Feeding reminders (interval badge) | StarterCard — "Feed me!" badge when overdue |
 | Rise chart (height over time) | FeedingLog — SVG sparkline from `height_mm` readings |
 | Starter archive / restore | StarterCard archive button; StartersView "Show archived" toggle |
-| Recipe import via Ollama | RecipesView → Import via Ollama |
+| Recipe import via Ollama (text or URL, heading-aware step titles) | RecipesView → Import via Ollama |
 | Recipe step check-off | RecipeCard — click step to mark done |
 | Recipe scaling | RecipeCard — scale × input, durations update, weight banner shown |
 | Timers | TimersView |

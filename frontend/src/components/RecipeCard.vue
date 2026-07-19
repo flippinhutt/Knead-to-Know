@@ -33,16 +33,28 @@
           <span v-else>{{ step.order }}</span>
         </span>
         <div class="step-body">
+          <strong v-if="step.title" class="step-title">{{ step.title }}</strong>
           <p>{{ step.description }}</p>
           <span v-if="step.duration_minutes" class="tag">{{ Math.round(step.duration_minutes * scale) }} min</span>
         </div>
+        <button
+          v-if="step.duration_minutes"
+          class="btn-sm btn-ghost"
+          :disabled="startingStep === step.order"
+          @click.stop="startTimer(step)"
+        >
+          {{ startingStep === step.order ? 'Starting…' : 'Start timer' }}
+        </button>
       </div>
     </div>
 
     <div v-if="editing" class="step-editor">
       <div v-for="(step, i) in draftSteps" :key="i" class="draft-step">
         <span class="step-num">{{ step.order }}</span>
-        <textarea v-model="draftSteps[i].description" rows="2" class="draft-desc" />
+        <div class="draft-body">
+          <input v-model="draftSteps[i].title" placeholder="Title (optional)" class="draft-title" />
+          <textarea v-model="draftSteps[i].description" rows="2" class="draft-desc" />
+        </div>
         <input v-model.number="draftSteps[i].duration_minutes" type="number" min="0" placeholder="min" class="draft-dur" />
         <button class="btn-sm btn-ghost" @click="removeStep(i)" title="Remove step">×</button>
       </div>
@@ -57,21 +69,24 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { Recipe } from '@/types'
+import type { Recipe, RecipeStep } from '@/types'
 import { useRecipesStore } from '@/stores/recipes'
+import { useTimersStore } from '@/stores/timers'
 
 const props = defineProps<{ recipe: Recipe }>()
 defineEmits<{ deleted: [] }>()
 
 const recipesStore = useRecipesStore()
+const timersStore = useTimersStore()
 
 const scale = ref(1)
 const checked = ref(new Set<number>())
 const anyChecked = computed(() => checked.value.size > 0)
 const editing = ref(false)
 const saving = ref(false)
+const startingStep = ref<number | null>(null)
 
-type DraftStep = { order: number; description: string; duration_minutes: number | null }
+type DraftStep = { order: number; title?: string | null; description: string; duration_minutes: number | null }
 const draftSteps = ref<DraftStep[]>([])
 
 function toggle(order: number) {
@@ -100,12 +115,27 @@ function cancelEdit() {
 
 function addStep() {
   const nextOrder = draftSteps.value.length ? Math.max(...draftSteps.value.map((s) => s.order)) + 1 : 1
-  draftSteps.value = [...draftSteps.value, { order: nextOrder, description: '', duration_minutes: null }]
+  draftSteps.value = [...draftSteps.value, { order: nextOrder, title: null, description: '', duration_minutes: null }]
 }
 
 function removeStep(i: number) {
   const next = draftSteps.value.filter((_, idx) => idx !== i).map((s, idx) => ({ ...s, order: idx + 1 }))
   draftSteps.value = next
+}
+
+async function startTimer(step: RecipeStep) {
+  if (!step.duration_minutes) return
+  startingStep.value = step.order
+  try {
+    const timer = await timersStore.create({
+      name: `${props.recipe.name} — step ${step.order}`,
+      duration_minutes: Math.round(step.duration_minutes * scale.value),
+      recipe_step_id: step.id,
+    })
+    await timersStore.start(timer.id)
+  } finally {
+    startingStep.value = null
+  }
 }
 
 async function saveSteps() {
@@ -137,9 +167,12 @@ h3 { font-size: 1rem; font-weight: 600; }
 .step-num { background: var(--accent); color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; transition: background 0.15s; }
 .check-icon { font-size: 0.85rem; }
 .step-body { flex: 1; font-size: 0.875rem; }
+.step-title { display: block; margin-bottom: 0.15rem; }
 .step-body p { margin-bottom: 0.2rem; transition: color 0.15s; }
 .step-editor { display: flex; flex-direction: column; gap: 0.5rem; }
 .draft-step { display: flex; align-items: flex-start; gap: 0.5rem; }
+.draft-body { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+.draft-title { font-size: 0.875rem; font-weight: 600; }
 .draft-desc { flex: 1; resize: vertical; font-size: 0.875rem; }
 .draft-dur { width: 60px; font-size: 0.875rem; }
 .btn-row { display: flex; gap: 0.5rem; justify-content: flex-end; }

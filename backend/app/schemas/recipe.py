@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class RecipeStepCreate(BaseModel):
     order: int
+    title: str | None = None
     description: str
     duration_minutes: int | None = None
 
@@ -52,5 +53,5 @@ class RecipeImportRequest(BaseModel):
 
 class RecipeImportPreview(BaseModel):
     name: str
-    description: str | None
+    description: str | None = None
     steps: list[RecipeStepCreate]

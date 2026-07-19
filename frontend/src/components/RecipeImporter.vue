@@ -32,14 +32,21 @@
     </div>
 
     <div v-else>
-      <h3 style="margin-bottom:0.25rem">{{ preview.name }}</h3>
-      <p v-if="preview.description" class="meta" style="margin-bottom:0.75rem">{{ preview.description }}</p>
-      <div class="steps">
-        <div v-for="step in preview.steps" :key="step.order" class="step">
+      <label>Name</label>
+      <input v-model="preview.name" style="margin-bottom:0.5rem" />
+      <label>Description</label>
+      <textarea v-model="preview.description" rows="2" style="margin-bottom:0.75rem" />
+      <div class="step-editor">
+        <div v-for="(step, i) in preview.steps" :key="i" class="draft-step">
           <span class="step-num">{{ step.order }}</span>
-          <span class="step-text">{{ step.description }}</span>
-          <span v-if="step.duration_minutes" class="tag">{{ step.duration_minutes }}m</span>
+          <div class="draft-body">
+            <input v-model="preview.steps[i].title" placeholder="Title (optional)" class="draft-title" />
+            <textarea v-model="preview.steps[i].description" rows="2" class="draft-desc" />
+          </div>
+          <input v-model.number="preview.steps[i].duration_minutes" type="number" min="0" placeholder="min" class="draft-dur" />
+          <button class="btn-sm btn-ghost" @click="removeStep(i)" title="Remove step">×</button>
         </div>
+        <button class="btn-sm btn-ghost" style="margin-top:0.4rem" @click="addStep">+ Add step</button>
       </div>
       <div class="btn-row" style="margin-top:0.75rem">
         <button class="btn-secondary" @click="preview = null">Back</button>
@@ -93,11 +100,24 @@ async function doImport() {
   }
 }
 
+function addStep() {
+  if (!preview.value) return
+  const steps = preview.value.steps
+  const nextOrder = steps.length ? Math.max(...steps.map((s) => s.order)) + 1 : 1
+  preview.value = { ...preview.value, steps: [...steps, { order: nextOrder, title: null, description: '', duration_minutes: null }] }
+}
+
+function removeStep(i: number) {
+  if (!preview.value) return
+  const steps = preview.value.steps.filter((_, idx) => idx !== i).map((s, idx) => ({ ...s, order: idx + 1 }))
+  preview.value = { ...preview.value, steps }
+}
+
 async function save() {
   if (!preview.value) return
   await recipesStore.create({
     name: preview.value.name,
-    description: preview.value.description ?? undefined,
+    description: preview.value.description?.trim() || undefined,
     steps: preview.value.steps,
     source: mode.value === 'url' ? url.value.trim() : undefined,
   })
@@ -117,4 +137,11 @@ textarea { width: 100%; resize: vertical; }
 .mode-btn { padding: 0.3rem 0.85rem; font-size: 0.82rem; background: none; border: none; cursor: pointer; color: var(--text-muted); }
 .mode-btn.active { background: var(--accent); color: #fff; }
 .hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.step-editor { display: flex; flex-direction: column; gap: 0.5rem; }
+.draft-step { display: flex; align-items: flex-start; gap: 0.5rem; }
+.draft-body { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+.draft-title { font-size: 0.875rem; font-weight: 600; }
+.draft-desc { flex: 1; resize: vertical; font-size: 0.875rem; }
+.draft-dur { width: 60px; font-size: 0.875rem; }
+.btn-ghost { background: none; border: 1px solid var(--border, #ccc); color: var(--text-muted); border-radius: 4px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.75rem; }
 </style>

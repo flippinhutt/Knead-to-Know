@@ -51,12 +51,17 @@ When parsing recipes, you identify timing, temperatures, and techniques accurate
 RECIPE_PROMPT = """\
 Parse this sourdough recipe into JSON. Return ONLY valid JSON, no explanation.
 
+Lines starting with "## " are section headings from the source page. When a heading is \
+immediately followed by body text before the next heading, treat the heading as that \
+step's "title" and the body text as its "description". Steps without a heading get \
+"title": null.
+
 Schema:
 {{
   "name": "string",
   "description": "string or null",
   "steps": [
-    {{"order": 1, "description": "string", "duration_minutes": number_or_null}}
+    {{"order": 1, "title": "string or null", "description": "string", "duration_minutes": number_or_null}}
   ]
 }}
 
@@ -80,6 +85,29 @@ async def chat(base_url: str, model: str, messages: list[dict]) -> str:
         return r.json()["message"]["content"]
 
 
+RECIPE_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "description": {"type": ["string", "null"]},
+        "steps": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "order": {"type": "integer"},
+                    "title": {"type": ["string", "null"]},
+                    "description": {"type": "string"},
+                    "duration_minutes": {"type": ["integer", "null"]},
+                },
+                "required": ["order", "description"],
+            },
+        },
+    },
+    "required": ["name", "steps"],
+}
+
+
 async def import_recipe(base_url: str, model: str, raw_text: str) -> dict:
     async with httpx.AsyncClient() as client:
         r = await client.post(
@@ -88,6 +116,7 @@ async def import_recipe(base_url: str, model: str, raw_text: str) -> dict:
                 "model": model,
                 "system": SYSTEM_PROMPT,
                 "prompt": RECIPE_PROMPT.format(raw_text=raw_text),
+                "format": RECIPE_JSON_SCHEMA,
                 "stream": False,
             },
             timeout=120.0,
@@ -96,4 +125,7 @@ async def import_recipe(base_url: str, model: str, raw_text: str) -> dict:
         response_text = r.json()["response"]
         # Strip markdown code fences if present
         clean = response_text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        return json.loads(clean)
+        try:
+            return json.loads(clean)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Model returned invalid JSON: {clean[:500]!r}") from exc

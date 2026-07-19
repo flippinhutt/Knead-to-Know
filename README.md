@@ -14,7 +14,7 @@ Sourdough starter tracker — log feedings, bakes, recipes, and timers. Runs loc
 ## Features
 
 - **Starters** — track multiple starters, log feedings (flour/water/starter grams, rise height, ambient temp, flour type/brand, notes), feeding reminders, SVG rise chart, archive/restore
-- **Recipes** — create recipes with ordered steps; import raw text via Ollama (paste any recipe text → Ollama parses it → review + confirm → saved); step check-off; scaling (weights + durations update)
+- **Recipes** — create recipes with ordered steps (optional title + description); import raw text or URL via Ollama (paste recipe text, or fetch a URL — JSON-LD parsed directly, else page HTML flattened with headings tagged so Ollama maps `h1`/`h2`/`h3` to step title and following text to step description → review + confirm → saved); step check-off; scaling (weights + durations update)
 - **Bakes** — log bakes linked to starter + recipe; outcome, oven temp, custom date, tags
 - **Timers** — countdown timers, optionally linked to recipe steps
 - **Baker Chat** — multi-turn sourdough Q&A via Ollama
@@ -117,7 +117,7 @@ Starter
         └── flour_type, flour_brand, notes
 
 Recipe
-  └── RecipeStep[]  (ordered, optional duration_minutes)
+  └── RecipeStep[]  (ordered, optional title, optional duration_minutes)
 
 Bake
   ├── starter_id (FK, optional)
