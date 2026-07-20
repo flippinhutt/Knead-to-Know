@@ -4,6 +4,16 @@ Sourdough starter tracker — log feedings, bakes, recipes, and timers. Runs loc
 
 See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for a walkthrough of daily use.
 
+## Screenshots
+
+| Starters | Recipes |
+|---|---|
+| ![Starters](pics/starterspage.png) | ![Recipes](pics/Recipespage.png) |
+
+| Timers | Baker Chat |
+|---|---|
+| ![Timers](pics/timerspage.png) | ![Baker Chat](pics/chatpage.png) |
+
 ## Stack
 
 | Layer | Tech |
