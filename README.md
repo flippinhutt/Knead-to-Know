@@ -19,7 +19,7 @@ See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for a walkthrough of daily use.
 - **Recipes** — create recipes with ordered steps (optional title + description); import raw text or URL via Ollama (paste recipe text, or fetch a URL — JSON-LD parsed directly, else page HTML flattened with headings tagged so Ollama maps `h1`/`h2`/`h3` to step title and following text to step description → review + confirm → saved); detail view with step check-off; scaling (weights + durations update)
 - **Bakes** — log bakes linked to starter + recipe; outcome, oven temp, custom date, tags
 - **Timers** — countdown timers, optionally linked to recipe steps
-- **Baker Chat** — multi-turn sourdough Q&A via Ollama
+- **Baker Chat** — multi-turn sourdough Q&A via Ollama, tuned for friendly/concise advice (separate prompt + temperature from recipe import)
 - **Calculators** — Hydration tab (flour + hydration % + starter → added water); Unit Converter tab (grams ↔ cups per ingredient)
 - **Units** — weight (g/oz/cup) and temperature (°F/°C) settings; stored as g/°F, displayed per preference
 - **Dark mode** — persisted to localStorage
@@ -119,7 +119,9 @@ Starter
         └── flour_type, flour_brand, notes
 
 Recipe
-  └── RecipeStep[]  (ordered, optional title, optional duration_minutes)
+  ├── name, description, source, image_url
+  ├── RecipeStep[]        (ordered, optional title, optional duration_minutes)
+  └── RecipeIngredient[]  (ordered, name, optional amount)
 
 Bake
   ├── starter_id (FK, optional)
@@ -162,7 +164,7 @@ sourdough/
 │   │   ├── models/          SQLAlchemy models
 │   │   ├── schemas/         Pydantic schemas
 │   │   ├── routers/         One file per domain
-│   │   └── services/        Ollama HTTP client
+│   │   └── services/        Ollama HTTP client (separate system prompts + temperature per call: recipe parser vs. baker chat)
 │   ├── tests/
 │   └── requirements.txt
 ├── frontend/

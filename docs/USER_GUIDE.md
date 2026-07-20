@@ -52,7 +52,7 @@ Step-by-step guide for daily use. For setup, see [README.md](../README.md).
 
 ## Baker Chat
 
-- Chat tab — multi-turn Q&A with a sourdough-expert system prompt via Ollama.
+- Chat tab — multi-turn Q&A with a friendly, concise sourdough-coach system prompt via Ollama.
 - Full conversation history is sent with each message, so context carries across turns.
 
 ## Calculators
