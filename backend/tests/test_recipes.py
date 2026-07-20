@@ -229,3 +229,35 @@ def test_delete_recipe(client):
     r = client.delete(f"/api/recipes/{created['id']}")
     assert r.status_code == 204
     assert client.get(f"/api/recipes/{created['id']}").status_code == 404
+
+
+def test_create_recipe_with_ingredients(client):
+    payload = {
+        "name": "Basic Country Loaf",
+        "ingredients": [
+            {"order": 1, "name": "Bread flour", "amount": "500g"},
+            {"order": 2, "name": "Water", "amount": "375g"},
+        ],
+    }
+    r = client.post("/api/recipes/", json=payload)
+    assert r.status_code == 201
+    data = r.json()
+    assert len(data["ingredients"]) == 2
+    assert data["ingredients"][0]["amount"] == "500g"
+
+
+def test_replace_ingredients(client):
+    created = client.post("/api/recipes/", json={"name": "Loaf"}).json()
+    r = client.put(
+        f"/api/recipes/{created['id']}/ingredients",
+        json={"ingredients": [{"order": 1, "name": "Starter", "amount": "100g"}]},
+    )
+    assert r.status_code == 200
+    assert r.json()["ingredients"] == [
+        {"order": 1, "name": "Starter", "amount": "100g", "id": r.json()["ingredients"][0]["id"], "recipe_id": created["id"]}
+    ]
+
+
+def test_replace_ingredients_not_found(client):
+    r = client.put("/api/recipes/999/ingredients", json={"ingredients": []})
+    assert r.status_code == 404

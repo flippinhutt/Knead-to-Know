@@ -33,8 +33,11 @@ npm test           # vitest unit tests
 ```
 
 ### Docker (full stack)
+
+Always rebuild images (`--build`) when running `docker compose up` in this project — stale images hide code changes.
+
 ```bash
-docker compose up -d          # start all services (app on port 3000)
+docker compose up -d --build  # start all services, rebuild images (app on port 3000)
 docker compose down           # stop
 docker compose logs -f api    # tail backend logs
 ```
@@ -58,7 +61,7 @@ docker compose logs -f api    # tail backend logs
 - `db.py` — SQLite engine + `get_db` session dependency
 
 ### Frontend (`frontend/src/`)
-- `views/` — `StartersView`, `RecipesView`, `TimersView`, `BakesView`, `ChatView`, `HydrationView`, `SettingsView`
+- `views/` — `StartersView`, `RecipesView`, `TimersView`, `BakesView`, `ChatView`, `CalculatorsView`, `SettingsView`
 - `components/` — `StarterCard`, `FeedingLog`, `RecipeCard`, `RecipeImporter`, `TimerWidget`, `BakeCard`
 - `stores/` — `starters.ts`, `recipes.ts`, `timers.ts`, `bakes.ts`, `ollama.ts`, `units.ts` (weight + temp unit, localStorage-persisted), `theme.ts`
 - `api/` — typed fetch wrappers; all requests go through `/api` prefix (proxied by nginx in Docker)
@@ -102,7 +105,7 @@ Migrations tracked:
 | Bake tags | BakesView — comma-sep tags shown as pills on BakeCard |
 | Flour type + brand on feedings | StarterCard — datalist suggestions for type; freetext brand; displayed in FeedingLog |
 | Baker chat (Ollama) | ChatView — multi-turn sourdough expert Q&A |
-| Hydration calculator | HydrationView — flour/hydration/starter → added water |
+| Calculators (hydration + unit converter) | CalculatorsView — hydration tab (flour/hydration/starter → added water), unit converter tab (grams ↔ cups per ingredient) |
 | Unit setting (g/oz/cup) | Settings → Units (weight); applies to all weight inputs + feeding display |
 | Temperature unit (°F/°C) | Settings → Units (temp); all temp inputs + display convert; stored as °F |
 | Dark mode | ◑ toggle in nav, persists to localStorage |

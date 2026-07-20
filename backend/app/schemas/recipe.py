@@ -17,17 +17,33 @@ class RecipeStepOut(RecipeStepCreate):
     model_config = {"from_attributes": True}
 
 
+class RecipeIngredientCreate(BaseModel):
+    order: int
+    name: str
+    amount: str | None = None
+
+
+class RecipeIngredientOut(RecipeIngredientCreate):
+    id: int
+    recipe_id: int
+
+    model_config = {"from_attributes": True}
+
+
 class RecipeCreate(BaseModel):
     name: str
     description: str | None = None
     source: str | None = None
+    image_url: str | None = None
     steps: list[RecipeStepCreate] = []
+    ingredients: list[RecipeIngredientCreate] = []
 
 
 class RecipeUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     source: str | None = None
+    image_url: str | None = None
 
 
 class RecipeOut(BaseModel):
@@ -35,14 +51,20 @@ class RecipeOut(BaseModel):
     name: str
     description: str | None
     source: str | None
+    image_url: str | None
     created_at: datetime
     steps: list[RecipeStepOut] = []
+    ingredients: list[RecipeIngredientOut] = []
 
     model_config = {"from_attributes": True}
 
 
 class RecipeStepsReplaceRequest(BaseModel):
     steps: list[RecipeStepCreate]
+
+
+class RecipeIngredientsReplaceRequest(BaseModel):
+    ingredients: list[RecipeIngredientCreate]
 
 
 class RecipeImportRequest(BaseModel):
@@ -55,3 +77,4 @@ class RecipeImportPreview(BaseModel):
     name: str
     description: str | None = None
     steps: list[RecipeStepCreate]
+    ingredients: list[RecipeIngredientCreate] = []

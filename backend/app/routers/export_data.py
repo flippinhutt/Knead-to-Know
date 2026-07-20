@@ -48,6 +48,7 @@ def export_all(db: Session = Depends(get_db)):
                 "name": r.name,
                 "description": r.description,
                 "source": r.source,
+                "image_url": r.image_url,
                 "created_at": r.created_at.isoformat(),
                 "steps": [
                     {
@@ -56,6 +57,14 @@ def export_all(db: Session = Depends(get_db)):
                         "duration_minutes": step.duration_minutes,
                     }
                     for step in r.steps
+                ],
+                "ingredients": [
+                    {
+                        "order": ing.order,
+                        "name": ing.name,
+                        "amount": ing.amount,
+                    }
+                    for ing in r.ingredients
                 ],
             }
             for r in recipes

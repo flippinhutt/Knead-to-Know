@@ -7,8 +7,16 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models.recipe import Recipe, RecipeStep
-from app.schemas.recipe import RecipeCreate, RecipeImportPreview, RecipeImportRequest, RecipeOut, RecipeStepsReplaceRequest, RecipeUpdate
+from app.models.recipe import Recipe, RecipeIngredient, RecipeStep
+from app.schemas.recipe import (
+    RecipeCreate,
+    RecipeImportPreview,
+    RecipeImportRequest,
+    RecipeIngredientsReplaceRequest,
+    RecipeOut,
+    RecipeStepsReplaceRequest,
+    RecipeUpdate,
+)
 from app.services import ollama as ollama_service
 
 
@@ -92,6 +100,12 @@ def _extract_recipe_from_json_ld(html: str) -> str | None:
                 parts.append(f"Recipe: {name}")
             if desc := item.get("description"):
                 parts.append(f"Description: {desc}")
+            ingredients = item.get("recipeIngredient") or item.get("ingredients") or []
+            if ingredients:
+                parts.append("Ingredients:")
+                for ing in ingredients:
+                    if isinstance(ing, str) and ing.strip():
+                        parts.append(f"- {ing.strip()}")
             for i, step in enumerate(item.get("recipeInstructions", []), 1):
                 if isinstance(step, str):
                     parts.append(f"{i}. {step}")
@@ -119,6 +133,8 @@ def create_recipe(body: RecipeCreate, db: Session = Depends(get_db)):
     db.flush()
     for step in body.steps:
         db.add(RecipeStep(recipe_id=recipe.id, **step.model_dump()))
+    for ingredient in body.ingredients:
+        db.add(RecipeIngredient(recipe_id=recipe.id, **ingredient.model_dump()))
     db.commit()
     db.refresh(recipe)
     return recipe
@@ -161,6 +177,19 @@ def replace_steps(recipe_id: int, body: RecipeStepsReplaceRequest, db: Session =
     db.query(RecipeStep).filter(RecipeStep.recipe_id == recipe_id).delete()
     for step in body.steps:
         db.add(RecipeStep(recipe_id=recipe_id, **step.model_dump()))
+    db.commit()
+    db.refresh(recipe)
+    return recipe
+
+
+@router.put("/{recipe_id}/ingredients", response_model=RecipeOut)
+def replace_ingredients(recipe_id: int, body: RecipeIngredientsReplaceRequest, db: Session = Depends(get_db)):
+    recipe = db.get(Recipe, recipe_id)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    db.query(RecipeIngredient).filter(RecipeIngredient.recipe_id == recipe_id).delete()
+    for ingredient in body.ingredients:
+        db.add(RecipeIngredient(recipe_id=recipe_id, **ingredient.model_dump()))
     db.commit()
     db.refresh(recipe)
     return recipe

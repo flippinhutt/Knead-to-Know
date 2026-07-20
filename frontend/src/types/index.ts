@@ -49,19 +49,30 @@ export interface RecipeStep {
   duration_minutes: number | null
 }
 
+export interface RecipeIngredient {
+  id?: number
+  recipe_id?: number
+  order: number
+  name: string
+  amount?: string | null
+}
+
 export interface Recipe {
   id: number
   name: string
   description: string | null
   source: string | null
+  image_url: string | null
   created_at: string
   steps: RecipeStep[]
+  ingredients: RecipeIngredient[]
 }
 
 export interface RecipeImportPreview {
   name: string
   description: string | null
   steps: RecipeStep[]
+  ingredients: RecipeIngredient[]
 }
 
 export interface Timer {

@@ -37,6 +37,15 @@
       <label>Description</label>
       <textarea v-model="preview.description" rows="2" style="margin-bottom:0.75rem" />
       <div class="step-editor">
+        <strong class="section-label">Ingredients</strong>
+        <div v-for="(ingredient, i) in preview.ingredients" :key="i" class="draft-ingredient">
+          <input v-model="preview.ingredients[i].amount" placeholder="Amount" class="draft-amount" />
+          <input v-model="preview.ingredients[i].name" placeholder="Ingredient" class="draft-ing-name" />
+          <button class="btn-sm btn-ghost" @click="removeIngredient(i)" title="Remove ingredient">×</button>
+        </div>
+        <button class="btn-sm btn-ghost" style="margin-top:0.4rem" @click="addIngredient">+ Add ingredient</button>
+
+        <strong class="section-label" style="margin-top:0.75rem;display:block">Steps</strong>
         <div v-for="(step, i) in preview.steps" :key="i" class="draft-step">
           <span class="step-num">{{ step.order }}</span>
           <div class="draft-body">
@@ -113,12 +122,26 @@ function removeStep(i: number) {
   preview.value = { ...preview.value, steps }
 }
 
+function addIngredient() {
+  if (!preview.value) return
+  const ingredients = preview.value.ingredients
+  const nextOrder = ingredients.length ? Math.max(...ingredients.map((i) => i.order)) + 1 : 1
+  preview.value = { ...preview.value, ingredients: [...ingredients, { order: nextOrder, name: '', amount: null }] }
+}
+
+function removeIngredient(i: number) {
+  if (!preview.value) return
+  const ingredients = preview.value.ingredients.filter((_, idx) => idx !== i).map((ing, idx) => ({ ...ing, order: idx + 1 }))
+  preview.value = { ...preview.value, ingredients }
+}
+
 async function save() {
   if (!preview.value) return
   await recipesStore.create({
     name: preview.value.name,
     description: preview.value.description?.trim() || undefined,
     steps: preview.value.steps,
+    ingredients: preview.value.ingredients,
     source: mode.value === 'url' ? url.value.trim() : undefined,
   })
   emit('saved')
@@ -144,4 +167,8 @@ textarea { width: 100%; resize: vertical; }
 .draft-desc { flex: 1; resize: vertical; font-size: 0.875rem; }
 .draft-dur { width: 60px; font-size: 0.875rem; }
 .btn-ghost { background: none; border: 1px solid var(--border, #ccc); color: var(--text-muted); border-radius: 4px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.75rem; }
+.section-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); }
+.draft-ingredient { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem; }
+.draft-amount { width: 90px; font-size: 0.875rem; }
+.draft-ing-name { flex: 1; font-size: 0.875rem; }
 </style>

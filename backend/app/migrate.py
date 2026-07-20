@@ -29,4 +29,8 @@ def run_migrations():
         if "title" not in recipe_steps_cols:
             conn.execute(text("ALTER TABLE recipe_steps ADD COLUMN title TEXT"))
 
+        recipes_cols = {row[1] for row in conn.execute(text("PRAGMA table_info(recipes)")).fetchall()}
+        if "image_url" not in recipes_cols:
+            conn.execute(text("ALTER TABLE recipes ADD COLUMN image_url TEXT"))
+
         conn.commit()

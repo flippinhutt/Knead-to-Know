@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
 
 class TimerCreate(BaseModel):
@@ -19,3 +19,11 @@ class TimerOut(BaseModel):
     recipe_step_id: int | None
 
     model_config = {"from_attributes": True}
+
+    @field_serializer("started_at", "ends_at")
+    def _serialize_utc(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.isoformat()

@@ -9,7 +9,7 @@ from fastapi import Depends
 from app.db import get_db
 from app.models.bake import Bake
 from app.models.feeding import Feeding
-from app.models.recipe import Recipe, RecipeStep
+from app.models.recipe import Recipe, RecipeIngredient, RecipeStep
 from app.models.starter import Starter
 
 router = APIRouter(prefix="/import", tags=["import"])
@@ -41,12 +41,20 @@ class ImportStep(BaseModel):
     duration_minutes: int | None = None
 
 
+class ImportIngredient(BaseModel):
+    order: int
+    name: str
+    amount: str | None = None
+
+
 class ImportRecipe(BaseModel):
     id: int
     name: str
     description: str | None = None
     source: str | None = None
+    image_url: str | None = None
     steps: list[ImportStep] = []
+    ingredients: list[ImportIngredient] = []
 
 
 class ImportBake(BaseModel):
@@ -94,7 +102,7 @@ def import_all(body: ImportPayload, db: Session = Depends(get_db)):
             ))
 
     for r in body.recipes:
-        recipe = Recipe(name=r.name, description=r.description, source=r.source)
+        recipe = Recipe(name=r.name, description=r.description, source=r.source, image_url=r.image_url)
         db.add(recipe)
         db.flush()
         recipe_id_map[r.id] = recipe.id
@@ -104,6 +112,13 @@ def import_all(body: ImportPayload, db: Session = Depends(get_db)):
                 order=step.order,
                 description=step.description,
                 duration_minutes=step.duration_minutes,
+            ))
+        for ingredient in r.ingredients:
+            db.add(RecipeIngredient(
+                recipe_id=recipe.id,
+                order=ingredient.order,
+                name=ingredient.name,
+                amount=ingredient.amount,
             ))
 
     for b in body.bakes:

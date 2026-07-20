@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { recipesApi } from '@/api/recipes'
-import type { Recipe, RecipeImportPreview, RecipeStep } from '@/types'
+import type { Recipe, RecipeImportPreview, RecipeIngredient, RecipeStep } from '@/types'
 
 export const useRecipesStore = defineStore('recipes', () => {
   const recipes = ref<Recipe[]>([])
@@ -20,10 +20,16 @@ export const useRecipesStore = defineStore('recipes', () => {
     }
   }
 
-  async function create(data: { name: string; description?: string; source?: string; steps?: RecipeStep[] }) {
+  async function create(data: { name: string; description?: string; source?: string; steps?: RecipeStep[]; ingredients?: RecipeIngredient[] }) {
     const recipe = await recipesApi.create(data)
     recipes.value = [...recipes.value, recipe]
     return recipe
+  }
+
+  async function update(id: number, data: Partial<{ name: string; description: string; source: string; image_url: string }>) {
+    const updated = await recipesApi.update(id, data)
+    recipes.value = recipes.value.map((r) => (r.id === id ? updated : r))
+    return updated
   }
 
   async function remove(id: number) {
@@ -37,9 +43,15 @@ export const useRecipesStore = defineStore('recipes', () => {
     return updated
   }
 
+  async function replaceIngredients(id: number, ingredients: Array<{ order: number; name: string; amount?: string | null }>) {
+    const updated = await recipesApi.replaceIngredients(id, ingredients)
+    recipes.value = recipes.value.map((r) => (r.id === id ? updated : r))
+    return updated
+  }
+
   async function importRecipe(params: { raw_text?: string; url?: string; model?: string }): Promise<RecipeImportPreview> {
     return recipesApi.import(params)
   }
 
-  return { recipes, loading, error, fetchAll, create, remove, replaceSteps, importRecipe }
+  return { recipes, loading, error, fetchAll, create, update, remove, replaceSteps, replaceIngredients, importRecipe }
 })

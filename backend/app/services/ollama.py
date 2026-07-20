@@ -60,6 +60,9 @@ Schema:
 {{
   "name": "string",
   "description": "string or null",
+  "ingredients": [
+    {{"order": 1, "name": "string", "amount": "string or null"}}
+  ],
   "steps": [
     {{"order": 1, "title": "string or null", "description": "string", "duration_minutes": number_or_null}}
   ]
@@ -90,6 +93,18 @@ RECIPE_JSON_SCHEMA = {
     "properties": {
         "name": {"type": "string"},
         "description": {"type": ["string", "null"]},
+        "ingredients": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "order": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "amount": {"type": ["string", "null"]},
+                },
+                "required": ["order", "name"],
+            },
+        },
         "steps": {
             "type": "array",
             "items": {

@@ -7,7 +7,7 @@
       <RouterLink to="/timers" :class="{ active: route.path === '/timers' }">Timers</RouterLink>
       <RouterLink to="/bakes" :class="{ active: route.path === '/bakes' }">Bakes</RouterLink>
       <RouterLink to="/chat" :class="{ active: route.path === '/chat' }">Chat</RouterLink>
-      <RouterLink to="/hydration" :class="{ active: route.path === '/hydration' }">Hydration</RouterLink>
+      <RouterLink to="/calculators" :class="{ active: route.path === '/calculators' }">Calculators</RouterLink>
       <RouterLink to="/settings" :class="{ active: route.path === '/settings' }">Settings</RouterLink>
       <button class="theme-toggle" @click="theme.toggle" :title="theme.dark ? 'Light mode' : 'Dark mode'">
         {{ theme.dark ? '☀' : '◑' }}
