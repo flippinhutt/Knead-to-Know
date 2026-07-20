@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Timer } from '@/types'
 
 const props = defineProps<{ timer: Timer }>()
@@ -27,7 +27,12 @@ defineEmits<{ start: []; stop: []; deleted: [] }>()
 const now = ref(Date.now())
 let interval: ReturnType<typeof setInterval> | null = null
 
-onMounted(() => { interval = setInterval(() => { now.value = Date.now() }, 1000) })
+onMounted(() => {
+  interval = setInterval(() => { now.value = Date.now() }, 1000)
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission()
+  }
+})
 onUnmounted(() => { if (interval) clearInterval(interval) })
 
 const remaining = computed(() => {
@@ -36,6 +41,30 @@ const remaining = computed(() => {
 })
 
 const isDone = computed(() => props.timer.is_active && remaining.value === 0)
+
+function playBeep() {
+  const Ctx = window.AudioContext || (window as any).webkitAudioContext
+  const ctx = new Ctx()
+  const gain = ctx.createGain()
+  gain.connect(ctx.destination)
+  gain.gain.setValueAtTime(0.2, ctx.currentTime)
+  ;[0, 0.3, 0.6].forEach((offset) => {
+    const osc = ctx.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.value = 880
+    osc.connect(gain)
+    osc.start(ctx.currentTime + offset)
+    osc.stop(ctx.currentTime + offset + 0.2)
+  })
+}
+
+watch(isDone, (done) => {
+  if (!done) return
+  playBeep()
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Timer done', { body: `${props.timer.name} finished` })
+  }
+})
 
 const displayTime = computed(() => {
   const s = remaining.value

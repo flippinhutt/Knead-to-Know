@@ -16,9 +16,9 @@ See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for a walkthrough of daily use.
 ## Features
 
 - **Starters** — track multiple starters, log feedings (flour/water/starter grams, rise height, ambient temp, flour type/brand, notes), feeding reminders, SVG rise chart, archive/restore
-- **Recipes** — create recipes with ordered steps (optional title + description); import raw text or URL via Ollama (paste recipe text, or fetch a URL — JSON-LD parsed directly, else page HTML flattened with headings tagged so Ollama maps `h1`/`h2`/`h3` to step title and following text to step description → review + confirm → saved); detail view with step check-off; scaling (weights + durations update)
+- **Recipes** — create recipes with ordered steps (optional title + description); import raw text or URL via Ollama (paste recipe text, or fetch a URL — JSON-LD parsed directly, else page HTML flattened with headings tagged so Ollama maps `h1`/`h2`/`h3` to step title and following text to step description; if source has both a short summary and a detailed step section, parser uses the detailed section only → review + confirm → saved); detail view with step check-off; scaling (weights + durations update)
 - **Bakes** — log bakes linked to starter + recipe; outcome, oven temp, custom date, tags
-- **Timers** — countdown timers, optionally linked to recipe steps
+- **Timers** — countdown timers, optionally linked to recipe steps; sound + browser notification when a timer finishes
 - **Baker Chat** — multi-turn sourdough Q&A via Ollama, tuned for friendly/concise advice (separate prompt + temperature from recipe import)
 - **Calculators** — Hydration tab (flour + hydration % + starter → added water); Unit Converter tab (grams ↔ cups per ingredient)
 - **Units** — weight (g/oz/cup) and temperature (°F/°C) settings; stored as g/°F, displayed per preference

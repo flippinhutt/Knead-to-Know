@@ -111,6 +111,9 @@ immediately followed by body text before the next heading, treat the heading as 
 "title" and the body text as its "description". Steps without a heading get "title": null.
 - Fold timing/temperature detail (autolyse, bulk fermentation, proof, bake) into the relevant \
 step's "description" text rather than dropping it — there is no separate field for it.
+- If the text contains both a short summary/cheatsheet/overview list AND a detailed step-by-step \
+section covering the same process, ignore the summary and build steps from the detailed section \
+only. Never use the short summary as the step list.
 - If the input text is not a recipe at all, return "name": "", "description": null, \
 "ingredients": [], "steps": [].
 
