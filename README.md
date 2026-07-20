@@ -46,6 +46,20 @@ docker compose up -d
 # App: http://localhost:3000
 ```
 
+## Deploy Prebuilt Images
+
+GitHub Actions builds and pushes images to GHCR on every push to `main`.
+
+```bash
+cp .env.example .env   # edit OLLAMA_BASE_URL if needed
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Images: `ghcr.io/flippinhutt/knead-to-know-api`, `ghcr.io/flippinhutt/knead-to-know-frontend`
+
+Packages default to private on GHCR — either make them public in package settings, or `docker login ghcr.io` on the deploy host first.
+
 ## Environment Variables
 
 | Variable | Default | Description |

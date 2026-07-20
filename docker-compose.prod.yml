@@ -1,0 +1,23 @@
+services:
+  api:
+    image: ghcr.io/flippinhutt/knead-to-know-api:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: sqlite:////data/sourdough.db
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
+    volumes:
+      - db-data:/data
+    expose:
+      - "8000"
+
+  frontend:
+    image: ghcr.io/flippinhutt/knead-to-know-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:80"
+    depends_on:
+      - api
+
+volumes:
+  db-data:
