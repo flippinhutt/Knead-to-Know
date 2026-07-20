@@ -2,6 +2,8 @@
 
 Sourdough starter tracker — log feedings, bakes, recipes, and timers. Runs locally/homelab. No external cloud. LLM features use [Ollama](https://ollama.com) (local).
 
+See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for a walkthrough of daily use.
+
 ## Stack
 
 | Layer | Tech |
@@ -14,11 +16,11 @@ Sourdough starter tracker — log feedings, bakes, recipes, and timers. Runs loc
 ## Features
 
 - **Starters** — track multiple starters, log feedings (flour/water/starter grams, rise height, ambient temp, flour type/brand, notes), feeding reminders, SVG rise chart, archive/restore
-- **Recipes** — create recipes with ordered steps (optional title + description); import raw text or URL via Ollama (paste recipe text, or fetch a URL — JSON-LD parsed directly, else page HTML flattened with headings tagged so Ollama maps `h1`/`h2`/`h3` to step title and following text to step description → review + confirm → saved); step check-off; scaling (weights + durations update)
+- **Recipes** — create recipes with ordered steps (optional title + description); import raw text or URL via Ollama (paste recipe text, or fetch a URL — JSON-LD parsed directly, else page HTML flattened with headings tagged so Ollama maps `h1`/`h2`/`h3` to step title and following text to step description → review + confirm → saved); detail view with step check-off; scaling (weights + durations update)
 - **Bakes** — log bakes linked to starter + recipe; outcome, oven temp, custom date, tags
 - **Timers** — countdown timers, optionally linked to recipe steps
 - **Baker Chat** — multi-turn sourdough Q&A via Ollama
-- **Hydration Calculator** — flour + hydration % + starter → added water
+- **Calculators** — Hydration tab (flour + hydration % + starter → added water); Unit Converter tab (grams ↔ cups per ingredient)
 - **Units** — weight (g/oz/cup) and temperature (°F/°C) settings; stored as g/°F, displayed per preference
 - **Dark mode** — persisted to localStorage
 - **Backup/Restore** — JSON export + import via Settings
@@ -165,10 +167,11 @@ sourdough/
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── views/           StartersView, RecipesView, BakesView, etc.
+│   │   ├── views/           StartersView, RecipesView, RecipeDetailView, BakesView, etc.
 │   │   ├── components/      StarterCard, FeedingLog, RecipeCard, etc.
 │   │   ├── stores/          Pinia stores per domain + units + theme
 │   │   ├── api/             Typed fetch wrappers
+│   │   ├── router/          Vue Router routes
 │   │   └── types/           Shared TypeScript interfaces
 │   └── nginx.conf
 ├── docker-compose.yml
