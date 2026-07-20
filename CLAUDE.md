@@ -34,13 +34,15 @@ npm test           # vitest unit tests
 
 ### Docker (full stack)
 
-Always rebuild images (`--build`) when running `docker compose up` in this project — stale images hide code changes.
+`docker-compose.yml` uses prebuilt GHCR images. `docker-compose.override.yml` (auto-loaded locally) adds `build:` back so local runs build from source. Always rebuild (`--build`) when running `docker compose up` in this project — stale images hide code changes.
 
 ```bash
-docker compose up -d --build  # start all services, rebuild images (app on port 3000)
+docker compose up -d --build  # start all services, rebuild images from source (app on port 3000)
 docker compose down           # stop
 docker compose logs -f api    # tail backend logs
 ```
+
+Deploy hosts without the override file just pull GHCR images via `docker compose pull && docker compose up -d`.
 
 ## Architecture
 

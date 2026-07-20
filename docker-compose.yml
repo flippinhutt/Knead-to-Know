@@ -1,6 +1,6 @@
 services:
   api:
-    build: ./backend
+    image: ghcr.io/flippinhutt/knead-to-know-api:latest
     restart: unless-stopped
     environment:
       DATABASE_URL: sqlite:////data/sourdough.db
@@ -12,7 +12,7 @@ services:
       - "8000"
 
   frontend:
-    build: ./frontend
+    image: ghcr.io/flippinhutt/knead-to-know-frontend:latest
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:80"

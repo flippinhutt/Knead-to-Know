@@ -38,22 +38,15 @@ ollama pull llama3   # or llama3.2, mistral, etc.
 
 ## Quick Start (Docker)
 
+Pulls prebuilt images from GHCR (built by GitHub Actions on every push to `main`).
+
 ```bash
 cp .env.example .env   # edit OLLAMA_BASE_URL if Ollama isn't on localhost
 
+docker compose pull
 docker compose up -d
 
 # App: http://localhost:3000
-```
-
-## Deploy Prebuilt Images
-
-GitHub Actions builds and pushes images to GHCR on every push to `main`.
-
-```bash
-cp .env.example .env   # edit OLLAMA_BASE_URL if needed
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
 ```
 
 Images: `ghcr.io/flippinhutt/knead-to-know-api`, `ghcr.io/flippinhutt/knead-to-know-frontend`
